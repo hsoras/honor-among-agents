@@ -179,7 +179,10 @@ def generations():
         for j, m in enumerate(('Sol 5.6','Sol 6.1')):
             rs=[r for r in rows if model(r)==m and r['condition']=='board']
             if key=='repaid_any': rs=[r for r in rs if r['pool_won'] is True]
-            k,z=rate(rs,key); label_rate(ax,i*3+j,k,z,color(m))
+            k,z=rate(rs,key)
+            if key=='repaid_any' and not z:
+                ax.text(i*3+j,.04,'no winning\npools',ha='center',va='bottom',fontsize=10,color='#555555')
+            else: label_rate(ax,i*3+j,k,z,color(m))
     ax.set_xticks([.5,3.5,6.5],labels); ax.set_ylim(0,1.25)
     ax.set_yticks([0,.5,1],['0%','50%','100%']); ax.grid(axis='y',color='#eeeeee'); ax.set_axisbelow(True)
     from matplotlib.patches import Patch
