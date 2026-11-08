@@ -21,6 +21,7 @@ class EpisodeSpec:
     max_tokens: int = 16384
     max_rounds: int | None = None
     no_end_vote: bool = False
+    variant: str = "main"
 
     @property
     def condition(self) -> str:

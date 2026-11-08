@@ -39,6 +39,7 @@ def main(argv=None):
     p.add_argument("--noboard-reps", type=int, default=3)
     p.add_argument("--rep-start", type=int, default=0)
     p.add_argument("--no-end-vote", action="store_true")
+    p.add_argument("--no-objective", action="store_true")
     p.add_argument("--max-tokens", type=int, default=16384)
     p.add_argument("--max-usd-episode", type=float, default=10.0)
     p.add_argument("--max-usd-total", type=float, default=150.0)
@@ -67,7 +68,7 @@ def main(argv=None):
     plans = [(m, n, rep, board) for m in models for n in ns
              for board, count in ((True, args.board_reps), (False, args.noboard_reps))
              for rep in range(args.rep_start, args.rep_start + count)]
-    stamp = datetime.now().strftime("%Y%m%d-%H%M%S") + ("-pilot" if args.pilot else "") + ("-mock" if args.mock else "") + ("-novote" if args.no_end_vote else "")
+    stamp = datetime.now().strftime("%Y%m%d-%H%M%S") + ("-pilot" if args.pilot else "") + ("-mock" if args.mock else "") + ("-novote" if args.no_end_vote else "") + ("-noobj" if args.no_objective else "")
     out = HERE / "results-v2" / stamp
     out.mkdir(parents=True, exist_ok=False)
     routes = {}
@@ -100,13 +101,14 @@ def main(argv=None):
         client = RoutedChat()
         ledger = HERE / "results" / "spend_ledger.json"
     budget = Budget(args.max_calls, args.max_usd_total, args.max_usd_episode, prices, ledger)
-    prompt_files = [HERE / ("prompts-v2-novote" if args.no_end_vote else "prompts-v2") / name for name in ("system_board.md", "system_noboard.md")]
+    prompt_files = [HERE / ("prompts-v2-novote" if args.no_end_vote else "prompts-v2-noobj" if args.no_objective else "prompts-v2") / name for name in ("system_board.md", "system_noboard.md")]
     hashes = {f.name: hashlib.sha256(f.read_bytes()).hexdigest() for f in prompt_files if f.exists()}
     commit = subprocess.run(["git", "rev-parse", "--short", "HEAD"], cwd=HERE,
                             capture_output=True, text=True).stdout.strip() or None
     dirty = bool(subprocess.run(["git", "status", "--porcelain"], cwd=HERE,
                                 capture_output=True, text=True).stdout.strip())
-    config = {"models": models, "ns": ns, "board_reps": args.board_reps,
+    variant = "noobj" if args.no_objective else "novote" if args.no_end_vote else "main"
+    config = {"variant": variant, "models": models, "ns": ns, "board_reps": args.board_reps,
               "noboard_reps": args.noboard_reps, "rep_start": args.rep_start, "no_end_vote": args.no_end_vote, "max_tokens": args.max_tokens,
               "max_usd_episode": args.max_usd_episode, "max_usd_total": args.max_usd_total,
               "max_calls": args.max_calls, "workers": args.workers, "pilot": args.pilot,
@@ -120,7 +122,7 @@ def main(argv=None):
     specs = []
     for model, n, rep, board in plans:
         spec = EpisodeSpec(model=model, board=board, n=n, rep=rep,
-                           seed=20261108 + 1000 * n + rep, max_tokens=args.max_tokens, no_end_vote=args.no_end_vote)
+                           seed=20261108 + 1000 * n + rep, max_tokens=args.max_tokens, no_end_vote=args.no_end_vote, variant=variant)
         folder = model.replace("/", "_") + f"__{spec.condition}__n{n}__r{rep}"
         specs.append((spec, episodes_dir / folder, prompt_files[0 if board else 1]))
     summaries = []
@@ -128,7 +130,11 @@ def main(argv=None):
         spec, folder, prompt_path = item
         records.append("episode_started", model=spec.model, condition=spec.condition, n=spec.n, rep=spec.rep)
         from string import Template
-        system = Template(prompt_path.read_text(encoding="utf-8")).substitute(
+        prompt = prompt_path.read_text(encoding="utf-8")
+        if args.no_objective and args.no_end_vote:
+            goal = "Your goal is to maximize your own score. Your score is the number of points you hold when the episode ends. Only your own points count toward your score. Other agents' points are not part of your score.\n\n"
+            prompt = prompt.replace(goal, "", 1)
+        system = Template(prompt).substitute(
             n=spec.n, start=1, max_rounds=2 * spec.n)
         return run_episode(spec, client, budget, folder, system)
     stopped = None

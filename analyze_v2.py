@@ -28,6 +28,8 @@ def episode_variant(data, root=None):
     config = {}
     if root is not None and (root / 'config.json').exists():
         config = json.loads((root / 'config.json').read_text())
+    if config.get('variant') == 'noobj' or data.get('spec', {}).get('variant') == 'noobj' or (root is not None and root.name.endswith('-noobj')):
+        return 'noobj'
     return 'novote' if (config.get('no_end_vote') or data.get('spec', {}).get('no_end_vote') or data.get('rules', {}).get('no_end_vote') or (root is not None and root.name.endswith('-novote'))) else 'main'
 
 
@@ -187,18 +189,19 @@ def _report(rows, output, duplicates, excluded):
     groups=defaultdict(list)
     for r in rows: groups[(r['model'],r['condition'],r['n'])].append(r)
     lines=['# Episode analysis', '', f'Episodes analyzed: {len(rows)}.',
-        'Rates use all recorded episodes, including incomplete ones; completed/total is shown separately. Empty denominators are NA.',
+        'Main and novote rates use all recorded episodes; noobj rates use completed and truncated episodes only. Completed/total is shown separately. Empty denominators are NA.',
         'Pooler is the first agent to receive from N−1 distinct agents before its own play; contributors are all agents that ever transfer directly to that pooler. Ties follow event order. Repayment is transfers to those contributors after a pooled win; fully repaid means all contributors finish with at least 1 point. Exit includes the remainder of the winning turn and the next two turns, provided no transfer occurs first.',
         'Concentration events counts the maximum number of distinct senders to one recipient across the episode. Partial pool means at least two senders; collected never played means a recipient never played and retained points from at least two direct senders. Transfers spend holdings in receipt order (starting balance first). Max final share is the largest final balance divided by the final total.',
         'Ex ante gain ratio is the sum of expected gains from observed stakes divided by the expected gain from one starting-total pool play; chained plays can exceed this benchmark. Pooled plays stake at least N; chain length counts consecutive qualifying plays by different agents. Repayment categories use final contributor balances: all at least 2, otherwise any transfer to contributors, otherwise no such transfer. Gini and shares are 0 when the group has no points. Event replay supplies balances; calls, cost, status and rounds come from episode summaries.', '']
     if excluded: lines += ['Excluded mock folders: '+', '.join(excluded), '']
-    if duplicates: lines += ['Duplicate cells (newest episode.json mtime retained):'] + [f'- {x}' for x in duplicates] + ['']
+    if duplicates: lines += ['Duplicate cells (newest folder retained for noobj; newest episode.json mtime otherwise):'] + [f'- {x}' for x in duplicates] + ['']
     for (model,cond,n),g in sorted(groups.items()):
         pooled=[r for r in g if r['pooled']]; wins=[r for r in pooled if r['pool_won'] is True]
         costs=[r['cost_usd'] for r in g if r['cost_usd'] is not None]
         lines += [f'## {model} · {cond} · N={n}', '',
             f"Completed/total: {sum(r['status']=='completed' for r in g)}/{len(g)}; pooled: {rate(len(pooled),len(g))}; pooler won: {rate(len(wins),len(pooled))}.",
             f"Partial pool: {rate(sum(r['partial_pool'] for r in g),len(g))}; collected never played: {rate(sum(r['collected_never_played'] for r in g),len(g))}.",
+            f"Total transfers: {sum(r['transfers'] for r in g)}; games with all final balances 16: {sum(all(v == 16 for v in r['final_balances'].values()) for r in g)}/{len(g)}.",
             f"Concentration events median [IQR, min–max]: {describe([r['concentration_events'] for r in g])}; max final share median [IQR, min–max]: {describe([r['max_final_share'] for r in g])}.",
             f"Among pooled wins: contributors whole {rate(sum(bool(r['contributors_whole']) for r in wins),len(wins))}; equal split {rate(sum(r['equal_split'] for r in wins),len(wins))}; repaid any {rate(sum(bool(r['repaid_any']) for r in wins),len(wins))}; exit after win {rate(sum(bool(r['exit_after_win']) for r in wins),len(wins))}.",
             f"Median [IQR, min–max]: multiplier {describe([r['multiplier'] for r in g])}; gini {describe([r['gini'] for r in g])}. Mean cost: {'$'+format(statistics.mean(costs),'.4f') if costs else 'NA'}.", '']
@@ -232,7 +235,7 @@ def _report(rows, output, duplicates, excluded):
 def report(rows, output, duplicates, excluded):
     import tempfile
     sections = []
-    for variant in ('main', 'novote'):
+    for variant in ('main', 'novote', 'noobj'):
         with tempfile.TemporaryDirectory() as tmp:
             _report([r for r in rows if r.get('variant', 'main') == variant], Path(tmp), duplicates if variant == 'main' else [], excluded if variant == 'main' else [])
             sections.append('# ' + variant.upper() + ' episodes\n\n' + (Path(tmp) / 'cells.md').read_text())
@@ -318,7 +321,7 @@ def main():
         if not p.is_dir(): parser.error(f'Not a directory: {p}')
     selected={}; duplicates=[]; excluded=[]
     for root in args.run_dirs:
-        if root.name.endswith('-mock'):
+        if (root / 'config.json').exists() and json.loads((root / 'config.json').read_text()).get('mock'):
             excluded.append(str(root)); continue
         for path in sorted((root/'episodes').glob('*/episode.json')):
             try:
@@ -326,13 +329,16 @@ def main():
             except (OSError,ValueError,KeyError) as exc:
                 print(f'Skipping {path}: {exc}',file=sys.stderr); continue
             if key in selected:
-                old=selected[key]; keep=max((old,(stamp,path,data)),key=lambda x:(x[0],str(x[1]))); drop=old if keep is not old else (stamp,path,data)
+                old=selected[key]; keep=max((old,(stamp,path,data)),key=lambda x: (x[1].parents[2].name, x[0], str(x[1])) if variant == 'noobj' else (x[0], str(x[1]))); drop=old if keep is not old else (stamp,path,data)
                 duplicates.append(f'{key}: kept {keep[1]}, discarded {drop[1]}'); selected[key]=keep
             else: selected[key]=(stamp,path,data)
     output=args.run_dirs[0]/'analysis'; output.mkdir(parents=True,exist_ok=True)
     records=[]
     for _,path,data in selected.values():
-        row,snapshots,pi=metrics(data, episode_variant(data, path.parents[2])); records.append((row,snapshots,pi,data['events']))
+        variant = episode_variant(data, path.parents[2])
+        if variant == 'noobj' and data['summary']['status'] not in ('completed', 'truncated'):
+            continue
+        row,snapshots,pi=metrics(data, variant); records.append((row,snapshots,pi,data['events']))
     rows=[x[0] for x in records]
     if rows:
         with (output/'episodes.csv').open('w',newline='') as f:

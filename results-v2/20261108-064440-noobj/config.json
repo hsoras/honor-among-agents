@@ -1,0 +1,61 @@
+{
+  "variant": "noobj",
+  "models": [
+    "anthropic/claude-opus-5.5"
+  ],
+  "ns": [
+    4
+  ],
+  "board_reps": 1,
+  "noboard_reps": 0,
+  "rep_start": 4,
+  "no_end_vote": false,
+  "max_tokens": 16384,
+  "max_usd_episode": 8.0,
+  "max_usd_total": 150.0,
+  "max_calls": 50000,
+  "workers": 8,
+  "pilot": false,
+  "mock": false,
+  "provider_overrides": {},
+  "routes": {
+    "anthropic/claude-opus-5.5": {
+      "provider_name": "Amazon Bedrock",
+      "provider_slug": "amazon-bedrock",
+      "tag": "amazon-bedrock",
+      "quantization": "unknown",
+      "price_usd_per_token": [
+        4e-06,
+        2e-05
+      ],
+      "blended_usd_per_call_estimate": 0.016,
+      "weights": {
+        "input_tokens": 3000,
+        "output_tokens": 200
+      }
+    }
+  },
+  "prompt_sha256": {
+    "system_board.md": "c47e97b9cb8a781dc74872388fecaf0c74dcc87a98134fefc1f5ba5e4c84942a",
+    "system_noboard.md": "b0fd74010674e9cfbf6d4e02bb04150513342c4af4729ad84af17d4cd43745ca"
+  },
+  "git_commit": "955d46c",
+  "git_dirty": true,
+  "argv": [
+    "run_v2.py",
+    "--live",
+    "--no-objective",
+    "--models",
+    "anthropic/claude-opus-5.5",
+    "--ns",
+    "4",
+    "--board-reps",
+    "1",
+    "--noboard-reps",
+    "0",
+    "--rep-start",
+    "4",
+    "--max-usd-episode",
+    "8"
+  ]
+}

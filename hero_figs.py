@@ -15,12 +15,14 @@ selected={}
 for run in runs:
  for p in sorted((run/'episodes').glob('*/episode.json')):
   d=json.loads(p.read_text()); q=d['summary']; key=(episode_variant(d,run),q['model'],q['condition'],q['n'],q['rep']); stamp=p.stat().st_mtime_ns
-  if key not in selected or (stamp,str(p))>(selected[key][0],str(selected[key][1])): selected[key]=(stamp,p,d)
+  order = (run.name, stamp, str(p)) if key[0]=='noobj' else (stamp, str(p))
+  if key not in selected or order>selected[key][0]: selected[key]=(order,p,d)
 rows=[]
 for _,p,d in selected.values():
  r,_,_=metrics(d,episode_variant(d,p.parents[2])); r['_path']=p; rows.append(r)
 main=[r for r in rows if r['variant']=='main' and r['status']=='completed' and r['n']==4]
 control=[r for r in rows if r['variant']=='novote' and r['status']=='completed' and r['n']==4]
+noobj=[r for r in rows if r['variant']=='noobj' and r['status'] in ('completed','truncated') and r['n']==4]
 def data(model,cond='board',source=main): return [r for r in source if s.model(r)==model and r['condition']==cond]
 def save(f,name): f.savefig(out/name,dpi=200,facecolor='white'); plt.close(f); print(name)
 def base(title,subtitle=None):
@@ -111,5 +113,36 @@ a.set_yticks(range(4),['Anthropic · Opus 5.5','Anthropic · Fable 5.1','OpenAI 
 a.set_title('Contributors whole',loc='left',fontsize=12); b.set_title('Pooled rate',loc='left',fontsize=12)
 f.text(.055,.08,f'Wilson 95% intervals · pooled lab comparison: Fisher exact p = {p:.3g}',fontsize=10,color='#555')
 save(f,'15_labs.png')
+
+# Objective-removal comparison and per-game final balances.
+f=base('Remove “maximize your own points” and Sol pays everyone back',
+       'Same game, same seeds · only the goal paragraph removed · board on · N=4')
+f.texts[0].set_fontsize(17)
+a=f.add_axes([.28,.25,.31,.43])
+f.text(.055,.745,'Contributors made whole after a winning pool',fontsize=12,weight='bold')
+groups=[('Sol 6.1',main,'Told to maximize own points'),('Sol 6.1',noobj,'No objective given'),
+        ('Opus 5.5',main,'Told to maximize own points'),('Opus 5.5',noobj,'No objective given')]
+counts=[]
+for i,(m,source,label) in enumerate(groups):
+ rs=[r for r in data(m,source=source) if r['pooled'] and r['pool_won']]
+ k=sum(r['contributors_whole'] for r in rs); counts.append((k,len(rs)))
+ ci(a,1.08,i,k,len(rs),s.color(m),source is main)
+a.plot([counts[0][0]/counts[0][1],counts[1][0]/counts[1][1]],[0,1],color=s.color('Sol 6.1'),alpha=.35,lw=2,zorder=0)
+a.set_yticks(range(4),[m+' · '+label for m,_,label in groups],fontsize=9)
+a.set_ylim(3.55,-.55); a.set_xlim(-.04,1.35)
+a.set_xticks([0,.5,1],['0%','50%','100%']); a.grid(axis='x',color='#e8e8e8'); a.set_axisbelow(True)
+a.tick_params(axis='y',length=0); a.spines[['left','right','top']].set_visible(False)
+sol=sorted(data('Sol 6.1',source=noobj),key=lambda r:r['rep'])
+f.text(.655,.745,'Sol 6.1 · final balances',fontsize=12,weight='bold',color=s.color('Sol 6.1'))
+f.text(.655,.705,'20 games · 4 agents per game',fontsize=9,color='#666')
+for i,r in enumerate(sol):
+ x=.655+(i%5)*.062; y=.47-(i//5)*.077
+ ax=f.add_axes([x,y,.052,.058]); vals=list(r['final_balances'].values())
+ ax.bar(range(4),vals,color=s.color('Sol 6.1'),width=.8); ax.set_ylim(0,16)
+ ax.set_xticks([]); ax.set_yticks([]); ax.spines[['left','right','top']].set_visible(False); ax.spines['bottom'].set_color('#bbb')
+f.text(.655,.19,'14 of 20 games: 16 / 16 / 16 / 16',fontsize=9,weight='bold',color=s.color('Sol 6.1'))
+p=s.fisher_exact([[counts[0][0],counts[0][1]-counts[0][0]],[counts[1][0],counts[1][1]-counts[1][0]]]).pvalue
+f.text(.055,.08,f'Wilson 95% intervals · Sol comparison: two-sided Fisher exact p = {p:.3g} · bars share a 0–16 scale',fontsize=9,color='#555')
+save(f,'16_objective.png')
 
 s.rows=main; s.out=out; s.generations()

@@ -1,0 +1,51 @@
+{
+  "episodes": [
+    {
+      "model": "anthropic/claude-opus-5.5",
+      "condition": "board",
+      "n": 4,
+      "rep": 4,
+      "seed": 20265112,
+      "status": "completed",
+      "error": null,
+      "rounds": 3,
+      "max_rounds": 8,
+      "final_balances": {
+        "agent_1": 16,
+        "agent_2": 16,
+        "agent_3": 16,
+        "agent_4": 16
+      },
+      "total_final": 64,
+      "total_start": 4,
+      "net_game_points": 60,
+      "plays": 4,
+      "wins": 4,
+      "max_stake": 32,
+      "full_pool": false,
+      "transfers": 9,
+      "transfer_volume": 110,
+      "posts": 7,
+      "vote_ends": 6,
+      "invalid_actions": 0,
+      "actions_per_turn": 2.6666666666666665,
+      "calls": 18,
+      "cost_usd": 0.28619200000000006,
+      "prompt_tokens": 54338,
+      "completion_tokens": 3442,
+      "reasoning_tokens": 1426,
+      "length_limited_replies": 0,
+      "max_share": 0.25,
+      "ruined_agents": 0
+    }
+  ],
+  "run": {
+    "complete": true,
+    "stopped": null
+  },
+  "budget": {
+    "calls": 18,
+    "ledger_usd_total": 130.11331349,
+    "halted": null
+  }
+}
