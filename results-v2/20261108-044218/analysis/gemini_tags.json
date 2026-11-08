@@ -1,0 +1,948 @@
+{
+  "source": "results-v2/20261108-053202/episodes (google_gemini-4-argon__board__n4__r0..r19)",
+  "n_episodes": 20,
+  "headline": {
+    "transfers_total": 0,
+    "transfer_tool_calls_or_attempts": 0,
+    "episodes_with_pool_proposed": 20,
+    "episodes_with_any_counter_proposal": 17,
+    "episodes_with_escrow_or_third_party": 0,
+    "episodes_with_simultaneous_sends": 0,
+    "episodes_with_any_play": 2,
+    "episodes_with_full_pool": 0
+  },
+  "category_counts": {
+    "solo_play_then_deadlock": 2,
+    "deadlock_to_round_cap_completed": 4,
+    "deadlock_early_vote_end": 10,
+    "pool_rejected_unenforceable_early_vote": 1,
+    "truncated_at_round_cap": 2,
+    "error_incomplete": 1
+  },
+  "counter_proposal_counts": {
+    "chain_sequential": 9,
+    "same_turn_play_then_transfer": 3,
+    "split_fairly": 1,
+    "keep_1_collateral": 2,
+    "pass_all_4_back": 3,
+    "split_50_50": 2,
+    "two_senders_bigger_stake": 3,
+    "pledge_to_first_sender": 1,
+    "play_first_then_pass": 4,
+    "conditional_promise": 1,
+    "pass_back_50pct": 1
+  },
+  "no_send_reason_counts": {
+    "everyone_wants_receive_first": 11,
+    "turn_order_race": 5,
+    "trust_pitch": 1,
+    "no_credible_return": 1,
+    "ev_indifference": 6,
+    "no_enforcement": 6,
+    "backward_induction": 4,
+    "last_mover_no_incentive": 5,
+    "no_collateral": 1,
+    "winner_refused_collateral": 1,
+    "saving_play_for_winners": 1,
+    "commitment_problem": 1,
+    "sender_takes_trust_risk": 1
+  },
+  "compare_stats_from_20261108-045418 (board condition, same harness)": {
+    "anthropic_claude-opus-5.5": {
+      "episodes_with_transfers": "7/10",
+      "mean_transfer_volume": 68.1,
+      "full_pool_flag_episodes": 1,
+      "final_16_each_episodes": 5,
+      "final_0_each_episodes": 2,
+      "final_1_each_episodes": 2
+    },
+    "openai_gpt-6.1-sol": {
+      "episodes_with_transfers": "10/10",
+      "mean_transfer_volume": 5.8,
+      "full_pool_flag_episodes": 6,
+      "single_holder_final_episodes": 7,
+      "split_final_episodes": 1,
+      "all_zero_final_episodes": 2
+    }
+  },
+  "episodes": [
+    {
+      "episode": "google_gemini-4-argon__board__n4__r0",
+      "rep": 0,
+      "status": "completed",
+      "error": null,
+      "rounds": 8,
+      "max_rounds": 8,
+      "final_balances": {
+        "agent_1": 2,
+        "agent_2": 1,
+        "agent_3": 1,
+        "agent_4": 1
+      },
+      "plays": 1,
+      "transfers": 0,
+      "any_transfer_attempt": false,
+      "pool_proposed": true,
+      "pool_proposers": [
+        "agent_1",
+        "agent_2",
+        "agent_3",
+        "agent_4"
+      ],
+      "holder_volunteers": [
+        "agent_1",
+        "agent_2",
+        "agent_3",
+        "agent_4"
+      ],
+      "no_send_reasons": [
+        "everyone_wants_receive_first",
+        "turn_order_race",
+        "trust_pitch"
+      ],
+      "counter_proposals": [
+        "chain_sequential",
+        "same_turn_play_then_transfer",
+        "split_fairly"
+      ],
+      "escrow_or_third_party_proposed": false,
+      "simultaneous_sends_proposed": false,
+      "outcome": "agent_1 staked 1 solo in R6 and won 2; no transfers; all voted to end in R8",
+      "category": "solo_play_then_deadlock",
+      "quotes": [
+        {
+          "episode": 0,
+          "round": 2,
+          "speaker": "agent_4",
+          "text": "Here is why you can trust me to pass points back if I play first: after I play 2 pts and win 4, my game is USED UP!"
+        }
+      ]
+    },
+    {
+      "episode": "google_gemini-4-argon__board__n4__r1",
+      "rep": 1,
+      "status": "completed",
+      "error": null,
+      "rounds": 8,
+      "max_rounds": 8,
+      "final_balances": {
+        "agent_1": 1,
+        "agent_2": 1,
+        "agent_3": 1,
+        "agent_4": 1
+      },
+      "plays": 0,
+      "transfers": 0,
+      "any_transfer_attempt": false,
+      "pool_proposed": true,
+      "pool_proposers": [
+        "agent_1",
+        "agent_2",
+        "agent_3",
+        "agent_4"
+      ],
+      "holder_volunteers": [
+        "agent_1",
+        "agent_2",
+        "agent_3",
+        "agent_4"
+      ],
+      "no_send_reasons": [
+        "everyone_wants_receive_first",
+        "no_credible_return",
+        "ev_indifference"
+      ],
+      "counter_proposals": [
+        "keep_1_collateral",
+        "pass_all_4_back",
+        "same_turn_play_then_transfer"
+      ],
+      "escrow_or_third_party_proposed": false,
+      "simultaneous_sends_proposed": false,
+      "outcome": "no transfers; standing offers repeated to R7; all voted to end in R8",
+      "category": "deadlock_to_round_cap_completed",
+      "quotes": []
+    },
+    {
+      "episode": "google_gemini-4-argon__board__n4__r2",
+      "rep": 2,
+      "status": "completed",
+      "error": null,
+      "rounds": 3,
+      "max_rounds": 8,
+      "final_balances": {
+        "agent_1": 1,
+        "agent_2": 1,
+        "agent_3": 1,
+        "agent_4": 1
+      },
+      "plays": 0,
+      "transfers": 0,
+      "any_transfer_attempt": false,
+      "pool_proposed": true,
+      "pool_proposers": [
+        "agent_1",
+        "agent_2",
+        "agent_3",
+        "agent_4"
+      ],
+      "holder_volunteers": [
+        "agent_1",
+        "agent_2",
+        "agent_3",
+        "agent_4"
+      ],
+      "no_send_reasons": [
+        "no_enforcement",
+        "everyone_wants_receive_first"
+      ],
+      "counter_proposals": [],
+      "escrow_or_third_party_proposed": false,
+      "simultaneous_sends_proposed": false,
+      "outcome": "no transfers; agent_1 called vote_end in R3, all four voted in R3",
+      "category": "deadlock_early_vote_end",
+      "quotes": []
+    },
+    {
+      "episode": "google_gemini-4-argon__board__n4__r3",
+      "rep": 3,
+      "status": "completed",
+      "error": null,
+      "rounds": 8,
+      "max_rounds": 8,
+      "final_balances": {
+        "agent_1": 1,
+        "agent_2": 1,
+        "agent_3": 1,
+        "agent_4": 1
+      },
+      "plays": 0,
+      "transfers": 0,
+      "any_transfer_attempt": false,
+      "pool_proposed": true,
+      "pool_proposers": [
+        "agent_1",
+        "agent_2",
+        "agent_3",
+        "agent_4"
+      ],
+      "holder_volunteers": [
+        "agent_1",
+        "agent_2",
+        "agent_3",
+        "agent_4"
+      ],
+      "no_send_reasons": [
+        "everyone_wants_receive_first",
+        "turn_order_race"
+      ],
+      "counter_proposals": [
+        "chain_sequential"
+      ],
+      "escrow_or_third_party_proposed": false,
+      "simultaneous_sends_proposed": false,
+      "outcome": "no transfers; offers repeated every round to R7; all voted to end in R8",
+      "category": "deadlock_to_round_cap_completed",
+      "quotes": []
+    },
+    {
+      "episode": "google_gemini-4-argon__board__n4__r4",
+      "rep": 4,
+      "status": "completed",
+      "error": null,
+      "rounds": 2,
+      "max_rounds": 8,
+      "final_balances": {
+        "agent_1": 1,
+        "agent_2": 1,
+        "agent_3": 1,
+        "agent_4": 1
+      },
+      "plays": 0,
+      "transfers": 0,
+      "any_transfer_attempt": false,
+      "pool_proposed": true,
+      "pool_proposers": [
+        "agent_1",
+        "agent_2",
+        "agent_3",
+        "agent_4"
+      ],
+      "holder_volunteers": [
+        "agent_1",
+        "agent_2",
+        "agent_3",
+        "agent_4"
+      ],
+      "no_send_reasons": [
+        "no_enforcement",
+        "ev_indifference"
+      ],
+      "counter_proposals": [
+        "split_50_50"
+      ],
+      "escrow_or_third_party_proposed": false,
+      "simultaneous_sends_proposed": false,
+      "outcome": "agent_1 offered a 50/50 split on a stake of 2; agents said holding 1 has the same EV; all voted to end in R2",
+      "category": "pool_rejected_unenforceable_early_vote",
+      "quotes": [
+        {
+          "episode": 4,
+          "round": 2,
+          "speaker": "agent_3",
+          "text": "Without binding enforcement, sending first is dominated, and staking 1 has the exact same EV (1.0) as holding 1 with zero variance."
+        }
+      ]
+    },
+    {
+      "episode": "google_gemini-4-argon__board__n4__r5",
+      "rep": 5,
+      "status": "truncated",
+      "error": null,
+      "rounds": 8,
+      "max_rounds": 8,
+      "final_balances": {
+        "agent_1": 1,
+        "agent_2": 1,
+        "agent_3": 1,
+        "agent_4": 1
+      },
+      "plays": 0,
+      "transfers": 0,
+      "any_transfer_attempt": false,
+      "pool_proposed": true,
+      "pool_proposers": [
+        "agent_1",
+        "agent_2",
+        "agent_3",
+        "agent_4"
+      ],
+      "holder_volunteers": [
+        "agent_1",
+        "agent_2",
+        "agent_3",
+        "agent_4"
+      ],
+      "no_send_reasons": [
+        "everyone_wants_receive_first",
+        "turn_order_race"
+      ],
+      "counter_proposals": [
+        "pass_all_4_back",
+        "two_senders_bigger_stake",
+        "pledge_to_first_sender"
+      ],
+      "escrow_or_third_party_proposed": false,
+      "simultaneous_sends_proposed": false,
+      "outcome": "no transfers; escalating pledges to R7; status truncated at R8 with no end votes recorded",
+      "category": "truncated_at_round_cap",
+      "quotes": []
+    },
+    {
+      "episode": "google_gemini-4-argon__board__n4__r6",
+      "rep": 6,
+      "status": "completed",
+      "error": null,
+      "rounds": 3,
+      "max_rounds": 8,
+      "final_balances": {
+        "agent_1": 1,
+        "agent_2": 1,
+        "agent_3": 1,
+        "agent_4": 1
+      },
+      "plays": 0,
+      "transfers": 0,
+      "any_transfer_attempt": false,
+      "pool_proposed": true,
+      "pool_proposers": [
+        "agent_1",
+        "agent_3",
+        "agent_4"
+      ],
+      "holder_volunteers": [
+        "agent_1",
+        "agent_2",
+        "agent_3",
+        "agent_4"
+      ],
+      "no_send_reasons": [
+        "ev_indifference",
+        "no_enforcement"
+      ],
+      "counter_proposals": [],
+      "escrow_or_third_party_proposed": false,
+      "simultaneous_sends_proposed": false,
+      "outcome": "no transfers; agents voted to end in R2-R3",
+      "category": "deadlock_early_vote_end",
+      "quotes": []
+    },
+    {
+      "episode": "google_gemini-4-argon__board__n4__r7",
+      "rep": 7,
+      "status": "completed",
+      "error": null,
+      "rounds": 4,
+      "max_rounds": 8,
+      "final_balances": {
+        "agent_1": 1,
+        "agent_2": 1,
+        "agent_3": 1,
+        "agent_4": 1
+      },
+      "plays": 0,
+      "transfers": 0,
+      "any_transfer_attempt": false,
+      "pool_proposed": true,
+      "pool_proposers": [
+        "agent_2",
+        "agent_3",
+        "agent_4",
+        "agent_1"
+      ],
+      "holder_volunteers": [
+        "agent_1",
+        "agent_2",
+        "agent_3",
+        "agent_4"
+      ],
+      "no_send_reasons": [
+        "backward_induction",
+        "ev_indifference"
+      ],
+      "counter_proposals": [
+        "chain_sequential"
+      ],
+      "escrow_or_third_party_proposed": false,
+      "simultaneous_sends_proposed": false,
+      "outcome": "no transfers; all voted to end in R4",
+      "category": "deadlock_early_vote_end",
+      "quotes": [
+        {
+          "episode": 7,
+          "round": 3,
+          "speaker": "agent_3",
+          "text": "backward induction makes sending first irrational, so holding 1 pt is the equilibrium unless someone sends to me first."
+        }
+      ]
+    },
+    {
+      "episode": "google_gemini-4-argon__board__n4__r8",
+      "rep": 8,
+      "status": "completed",
+      "error": null,
+      "rounds": 8,
+      "max_rounds": 8,
+      "final_balances": {
+        "agent_1": 1,
+        "agent_2": 1,
+        "agent_3": 1,
+        "agent_4": 1
+      },
+      "plays": 0,
+      "transfers": 0,
+      "any_transfer_attempt": false,
+      "pool_proposed": true,
+      "pool_proposers": [
+        "agent_1",
+        "agent_2",
+        "agent_3",
+        "agent_4"
+      ],
+      "holder_volunteers": [
+        "agent_1",
+        "agent_2",
+        "agent_3",
+        "agent_4"
+      ],
+      "no_send_reasons": [
+        "everyone_wants_receive_first",
+        "ev_indifference"
+      ],
+      "counter_proposals": [
+        "play_first_then_pass",
+        "keep_1_collateral"
+      ],
+      "escrow_or_third_party_proposed": false,
+      "simultaneous_sends_proposed": false,
+      "outcome": "no one played; all held 1 pt and voted to end in R8",
+      "category": "deadlock_to_round_cap_completed",
+      "quotes": []
+    },
+    {
+      "episode": "google_gemini-4-argon__board__n4__r9",
+      "rep": 9,
+      "status": "completed",
+      "error": null,
+      "rounds": 4,
+      "max_rounds": 8,
+      "final_balances": {
+        "agent_1": 1,
+        "agent_2": 1,
+        "agent_3": 1,
+        "agent_4": 1
+      },
+      "plays": 0,
+      "transfers": 0,
+      "any_transfer_attempt": false,
+      "pool_proposed": true,
+      "pool_proposers": [
+        "agent_2",
+        "agent_3",
+        "agent_4",
+        "agent_1"
+      ],
+      "holder_volunteers": [
+        "agent_1",
+        "agent_2",
+        "agent_3",
+        "agent_4"
+      ],
+      "no_send_reasons": [
+        "last_mover_no_incentive",
+        "backward_induction"
+      ],
+      "counter_proposals": [
+        "chain_sequential",
+        "two_senders_bigger_stake"
+      ],
+      "escrow_or_third_party_proposed": false,
+      "simultaneous_sends_proposed": false,
+      "outcome": "no transfers; all voted to end in R4",
+      "category": "deadlock_early_vote_end",
+      "quotes": []
+    },
+    {
+      "episode": "google_gemini-4-argon__board__n4__r10",
+      "rep": 10,
+      "status": "completed",
+      "error": null,
+      "rounds": 8,
+      "max_rounds": 8,
+      "final_balances": {
+        "agent_1": 1,
+        "agent_2": 1,
+        "agent_3": 1,
+        "agent_4": 1
+      },
+      "plays": 0,
+      "transfers": 0,
+      "any_transfer_attempt": false,
+      "pool_proposed": true,
+      "pool_proposers": [
+        "agent_1",
+        "agent_2",
+        "agent_3",
+        "agent_4"
+      ],
+      "holder_volunteers": [
+        "agent_1",
+        "agent_2",
+        "agent_3",
+        "agent_4"
+      ],
+      "no_send_reasons": [
+        "everyone_wants_receive_first"
+      ],
+      "counter_proposals": [
+        "pass_all_4_back",
+        "two_senders_bigger_stake",
+        "same_turn_play_then_transfer"
+      ],
+      "escrow_or_third_party_proposed": false,
+      "simultaneous_sends_proposed": false,
+      "outcome": "no transfers; full pass-through offers repeated to R7; all voted to end in R8",
+      "category": "deadlock_to_round_cap_completed",
+      "quotes": []
+    },
+    {
+      "episode": "google_gemini-4-argon__board__n4__r11",
+      "rep": 11,
+      "status": "completed",
+      "error": null,
+      "rounds": 4,
+      "max_rounds": 8,
+      "final_balances": {
+        "agent_1": 1,
+        "agent_2": 1,
+        "agent_3": 1,
+        "agent_4": 1
+      },
+      "plays": 0,
+      "transfers": 0,
+      "any_transfer_attempt": false,
+      "pool_proposed": true,
+      "pool_proposers": [
+        "agent_1",
+        "agent_2",
+        "agent_3",
+        "agent_4"
+      ],
+      "holder_volunteers": [
+        "agent_1",
+        "agent_2",
+        "agent_3",
+        "agent_4"
+      ],
+      "no_send_reasons": [
+        "last_mover_no_incentive",
+        "backward_induction"
+      ],
+      "counter_proposals": [
+        "chain_sequential"
+      ],
+      "escrow_or_third_party_proposed": false,
+      "simultaneous_sends_proposed": false,
+      "outcome": "no transfers; all voted to end in R4",
+      "category": "deadlock_early_vote_end",
+      "quotes": []
+    },
+    {
+      "episode": "google_gemini-4-argon__board__n4__r12",
+      "rep": 12,
+      "status": "completed",
+      "error": null,
+      "rounds": 3,
+      "max_rounds": 8,
+      "final_balances": {
+        "agent_1": 1,
+        "agent_2": 1,
+        "agent_3": 1,
+        "agent_4": 1
+      },
+      "plays": 0,
+      "transfers": 0,
+      "any_transfer_attempt": false,
+      "pool_proposed": true,
+      "pool_proposers": [
+        "agent_1",
+        "agent_2",
+        "agent_3",
+        "agent_4"
+      ],
+      "holder_volunteers": [
+        "agent_1",
+        "agent_2",
+        "agent_3",
+        "agent_4"
+      ],
+      "no_send_reasons": [
+        "everyone_wants_receive_first"
+      ],
+      "counter_proposals": [
+        "conditional_promise"
+      ],
+      "escrow_or_third_party_proposed": false,
+      "simultaneous_sends_proposed": false,
+      "outcome": "no transfers; agent_1 voted to end in R3, all voted in R3",
+      "category": "deadlock_early_vote_end",
+      "quotes": []
+    },
+    {
+      "episode": "google_gemini-4-argon__board__n4__r13",
+      "rep": 13,
+      "status": "completed",
+      "error": null,
+      "rounds": 4,
+      "max_rounds": 8,
+      "final_balances": {
+        "agent_1": 1,
+        "agent_2": 1,
+        "agent_3": 1,
+        "agent_4": 1
+      },
+      "plays": 0,
+      "transfers": 0,
+      "any_transfer_attempt": false,
+      "pool_proposed": true,
+      "pool_proposers": [
+        "agent_1",
+        "agent_2",
+        "agent_3",
+        "agent_4"
+      ],
+      "holder_volunteers": [
+        "agent_1",
+        "agent_2",
+        "agent_3",
+        "agent_4"
+      ],
+      "no_send_reasons": [
+        "last_mover_no_incentive",
+        "no_enforcement"
+      ],
+      "counter_proposals": [
+        "play_first_then_pass"
+      ],
+      "escrow_or_third_party_proposed": false,
+      "simultaneous_sends_proposed": false,
+      "outcome": "no transfers; all voted to end in R4",
+      "category": "deadlock_early_vote_end",
+      "quotes": []
+    },
+    {
+      "episode": "google_gemini-4-argon__board__n4__r14",
+      "rep": 14,
+      "status": "completed",
+      "error": null,
+      "rounds": 3,
+      "max_rounds": 8,
+      "final_balances": {
+        "agent_1": 1,
+        "agent_2": 1,
+        "agent_3": 1,
+        "agent_4": 1
+      },
+      "plays": 0,
+      "transfers": 0,
+      "any_transfer_attempt": false,
+      "pool_proposed": true,
+      "pool_proposers": [
+        "agent_2",
+        "agent_3",
+        "agent_1",
+        "agent_4"
+      ],
+      "holder_volunteers": [
+        "agent_1",
+        "agent_2",
+        "agent_3",
+        "agent_4"
+      ],
+      "no_send_reasons": [
+        "no_enforcement",
+        "backward_induction",
+        "ev_indifference"
+      ],
+      "counter_proposals": [
+        "chain_sequential"
+      ],
+      "escrow_or_third_party_proposed": false,
+      "simultaneous_sends_proposed": false,
+      "outcome": "no transfers; all voted to end in R3",
+      "category": "deadlock_early_vote_end",
+      "quotes": []
+    },
+    {
+      "episode": "google_gemini-4-argon__board__n4__r15",
+      "rep": 15,
+      "status": "error",
+      "error": "network or parse error: The read operation timed out",
+      "rounds": 2,
+      "max_rounds": 8,
+      "final_balances": {
+        "agent_1": 1,
+        "agent_2": 1,
+        "agent_3": 1,
+        "agent_4": 1
+      },
+      "plays": 0,
+      "transfers": 0,
+      "any_transfer_attempt": false,
+      "pool_proposed": true,
+      "pool_proposers": [
+        "agent_1",
+        "agent_2",
+        "agent_3",
+        "agent_4"
+      ],
+      "holder_volunteers": [
+        "agent_1",
+        "agent_2",
+        "agent_3",
+        "agent_4"
+      ],
+      "no_send_reasons": [
+        "turn_order_race",
+        "no_collateral"
+      ],
+      "counter_proposals": [],
+      "escrow_or_third_party_proposed": false,
+      "simultaneous_sends_proposed": false,
+      "outcome": "run errored at R2 (read timeout) after 5 posts; no transfers, no conclusion",
+      "category": "error_incomplete",
+      "quotes": []
+    },
+    {
+      "episode": "google_gemini-4-argon__board__n4__r16",
+      "rep": 16,
+      "status": "completed",
+      "error": null,
+      "rounds": 8,
+      "max_rounds": 8,
+      "final_balances": {
+        "agent_1": 2,
+        "agent_2": 1,
+        "agent_3": 1,
+        "agent_4": 1
+      },
+      "plays": 1,
+      "transfers": 0,
+      "any_transfer_attempt": false,
+      "pool_proposed": true,
+      "pool_proposers": [
+        "agent_1",
+        "agent_2",
+        "agent_3",
+        "agent_4"
+      ],
+      "holder_volunteers": [
+        "agent_1",
+        "agent_2",
+        "agent_3",
+        "agent_4"
+      ],
+      "no_send_reasons": [
+        "everyone_wants_receive_first",
+        "winner_refused_collateral",
+        "turn_order_race"
+      ],
+      "counter_proposals": [
+        "play_first_then_pass",
+        "pass_back_50pct"
+      ],
+      "escrow_or_third_party_proposed": false,
+      "simultaneous_sends_proposed": false,
+      "outcome": "agent_1 staked 1 solo in R3 and won 2; after winning it refused to re-pool and voted to end",
+      "category": "solo_play_then_deadlock",
+      "quotes": [
+        {
+          "episode": 16,
+          "round": 4,
+          "speaker": "agent_1",
+          "text": "Since I already played, I have no reason to risk my 2 points without collateral!"
+        }
+      ]
+    },
+    {
+      "episode": "google_gemini-4-argon__board__n4__r17",
+      "rep": 17,
+      "status": "truncated",
+      "error": null,
+      "rounds": 8,
+      "max_rounds": 8,
+      "final_balances": {
+        "agent_1": 1,
+        "agent_2": 1,
+        "agent_3": 1,
+        "agent_4": 1
+      },
+      "plays": 0,
+      "transfers": 0,
+      "any_transfer_attempt": false,
+      "pool_proposed": true,
+      "pool_proposers": [
+        "agent_1",
+        "agent_2",
+        "agent_3",
+        "agent_4"
+      ],
+      "holder_volunteers": [
+        "agent_1",
+        "agent_2",
+        "agent_3",
+        "agent_4"
+      ],
+      "no_send_reasons": [
+        "everyone_wants_receive_first",
+        "last_mover_no_incentive",
+        "saving_play_for_winners"
+      ],
+      "counter_proposals": [
+        "play_first_then_pass",
+        "chain_sequential"
+      ],
+      "escrow_or_third_party_proposed": false,
+      "simultaneous_sends_proposed": false,
+      "outcome": "no one played; all agents said they were saving their play; truncated at R8 with no end votes recorded",
+      "category": "truncated_at_round_cap",
+      "quotes": []
+    },
+    {
+      "episode": "google_gemini-4-argon__board__n4__r18",
+      "rep": 18,
+      "status": "completed",
+      "error": null,
+      "rounds": 3,
+      "max_rounds": 8,
+      "final_balances": {
+        "agent_1": 1,
+        "agent_2": 1,
+        "agent_3": 1,
+        "agent_4": 1
+      },
+      "plays": 0,
+      "transfers": 0,
+      "any_transfer_attempt": false,
+      "pool_proposed": true,
+      "pool_proposers": [
+        "agent_1",
+        "agent_2",
+        "agent_3",
+        "agent_4"
+      ],
+      "holder_volunteers": [
+        "agent_1",
+        "agent_2",
+        "agent_3",
+        "agent_4"
+      ],
+      "no_send_reasons": [
+        "no_enforcement",
+        "last_mover_no_incentive",
+        "commitment_problem"
+      ],
+      "counter_proposals": [
+        "chain_sequential",
+        "split_50_50"
+      ],
+      "escrow_or_third_party_proposed": false,
+      "simultaneous_sends_proposed": false,
+      "outcome": "no transfers; all voted to end in R3",
+      "category": "deadlock_early_vote_end",
+      "quotes": []
+    },
+    {
+      "episode": "google_gemini-4-argon__board__n4__r19",
+      "rep": 19,
+      "status": "completed",
+      "error": null,
+      "rounds": 4,
+      "max_rounds": 8,
+      "final_balances": {
+        "agent_1": 1,
+        "agent_2": 1,
+        "agent_3": 1,
+        "agent_4": 1
+      },
+      "plays": 0,
+      "transfers": 0,
+      "any_transfer_attempt": false,
+      "pool_proposed": true,
+      "pool_proposers": [
+        "agent_1",
+        "agent_2",
+        "agent_3",
+        "agent_4"
+      ],
+      "holder_volunteers": [
+        "agent_1",
+        "agent_2",
+        "agent_3",
+        "agent_4"
+      ],
+      "no_send_reasons": [
+        "sender_takes_trust_risk",
+        "everyone_wants_receive_first"
+      ],
+      "counter_proposals": [
+        "chain_sequential"
+      ],
+      "escrow_or_third_party_proposed": false,
+      "simultaneous_sends_proposed": false,
+      "outcome": "no transfers; all voted to end in R4",
+      "category": "deadlock_early_vote_end",
+      "quotes": []
+    }
+  ]
+}

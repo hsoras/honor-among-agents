@@ -2,7 +2,7 @@
 """Render offline presentation figures from one or more analyze_v2 run directories."""
 import argparse, json, math, sys
 from collections import Counter
-from analyze_v2 import metrics
+from analyze_v2 import metrics, short_model, episode_variant
 from pathlib import Path
 import numpy as np
 import matplotlib
@@ -12,13 +12,12 @@ from matplotlib.colors import to_rgb
 from matplotlib.ticker import FuncFormatter
 from scipy.stats import fisher_exact
 
-COLORS={'Opus':'#0072B2','Sol':'#D55E00','Haiku':'#009E73','Luna':'#CC79A7'}
+COLORS={'Opus 5.5':'#0072B2','Sol 6.1':'#D55E00','Gemini 4 Argon':'#56B4E9','Sol 5.6':'#E69F00','Haiku 5.5':'#009E73','Luna 6':'#CC79A7'}
 GREY='#B8B8B8'
 plt.rcParams.update({'font.family':'sans-serif','font.sans-serif':['DejaVu Sans','Arial','Helvetica Neue'], 'font.size':13,'axes.spines.top':False,'axes.spines.right':False,'figure.facecolor':'white','savefig.facecolor':'white','axes.titleweight':'bold'})
 
 def model(r):
-    s=r['model'].lower()
-    return next ( (m for m in COLORS if m.lower() in s), r['model'].split('/')[-1])
+    return short_model(r['model'])
 def color(m): return COLORS.get(m, '#777777')
 def tint(c): return tuple(.62 + .38*x for x in to_rgb(c))
 def title(fig, heading, subtitle):
@@ -45,9 +44,11 @@ def balances():
     groups=[(n,m,sorted(subset(n,m,'board'),key=lambda r:r['rep'])) for n in ns for m in models]
     groups=[g for g in groups if g[2]]
     if not groups: return
-    pages=[groups[i:i+2] for i in range(0,len(groups),2)] if len(models)>=4 else [groups]
+    page_models=[['Opus 5.5','Sol 6.1'],['Gemini 4 Argon','Sol 5.6'],['Haiku 5.5','Luna 6']]
+    pages=[[g for g in groups if g[1] in names] for names in page_models]
+    pages=[p for p in pages if p]
     for page_no,page in enumerate(pages):
-        f=fig(); title(f,'Same game, opposite endings','Final balances in every board episode · colored bar identifies the first pooler')
+        f=fig(); title(f, 'An older Sol: final balances' if all(m == 'Sol 5.6' for _,m,_ in page) else 'Final balances by model', 'Every board episode · colored bar identifies the first pooler')
         chunks=[(n,m,[r for r in rs if r['rep']//10 == block]) for n,m,rs in page for block in sorted({r['rep']//10 for r in rs})]
         gs=f.add_gridspec(len(chunks),10,left=.12,right=.98,bottom=.08,top=.80,hspace=.65,wspace=.22)
         ymax=max(16,max(max(r['final_balances'].values(),default=0) for _,_,rs in page for r in rs))
@@ -68,7 +69,7 @@ def balances():
         save(f,name)
 
 def rates():
-    f=fig(); title(f,'A board unlocks pooling','Wilson 95% intervals · sharing among winning poolers')
+    f=plt.figure(figsize=(22,5.4)); title(f,'A board unlocks pooling','Wilson 95% intervals · sharing among winning poolers')
     gs=f.add_gridspec(1,2,left=.08,right=.97,bottom=.18,top=.75,wspace=.24,width_ratios=[1.45,1]); a=f.add_subplot(gs[0]); b=f.add_subplot(gs[1]); a.set_title('Pooled',loc='left',fontsize=17); b.set_title('After winning, shared',loc='left',fontsize=17)
     labs=[]; x=0
     for n in ns:
@@ -107,12 +108,12 @@ def outcomes():
     save(f,'03_what_winners_did.png')
 
 def multipliers():
-    f=fig(); title(f,'Pooling can multiply group wealth','Each dot is an episode · horizontal mark is the median · zero shown separately')
+    f=plt.figure(figsize=(15,5.4)); title(f,'Pooling can multiply group wealth','Each dot is an episode · horizontal mark is the median · zero shown separately')
     ax=f.add_axes([.12,.18,.84,.58]); groups=[(n,m,c,subset(n,m,c)) for n in ns for m in models for c in ['board','noboard']]; groups=[g for g in groups if g[3]]
     # Map zero below the log scale, preserving powers-of-two spacing.
     trans=lambda v: -2 if v<=0 else math.log2(v)
     for x,(n,m,c,rs) in enumerate(groups):
-      vals=[r['multiplier'] for r in rs]; offsets=np.linspace(-.18,.18,len(vals)) if len(vals)>1 else [0]
+      vals=[r['multiplier'] for r in rs]; offsets=np.linspace(-.18,.18,len(vals)) if len(vals)>1 else np.array([0])
       ax.scatter(x+offsets,[trans(v) for v in vals],s=55,facecolors=color(m) if c=='board' else 'white',edgecolors=color(m) if c=='board' else GREY,linewidths=1.5,zorder=3)
       ax.plot([x-.24,x+.24],[trans(float(np.median(vals)))]*2,color='#222222',lw=2.5,zorder=4)
     upper=max(4,math.ceil(max(trans(r['multiplier']) for r in rows))); ticks=[-2,-1,0,1,2,3,4]+list(range(5,upper+1)); ax.set_yticks(ticks,['0','0.5×','1×','2×','4×','8×','16×']+[f'{2**i}×' for i in range(5,upper+1)]); ax.set_ylim(-2.5,upper+.5); ax.axhline(0,color='#888888',ls='--',lw=1); ax.text(len(groups)-.48,.12,'start',color='#666666',fontsize=12,ha='right'); ax.grid(axis='y',color='#eeeeee'); ax.set_axisbelow(True)
@@ -120,7 +121,7 @@ def multipliers():
     save(f,'04_group_multiplier.png')
 
 def timeline(m,filename):
-    candidates=[r for r in rows if model(r)==m and r['condition']=='board' and (all(v==16 for v in r['final_balances'].values()) if m=='Opus' else r['exit_after_win'] and sorted(r['final_balances'].values())==[0]*(r['n']-1)+[8])]
+    candidates=[r for r in rows if model(r)==m and r['condition']=='board' and (all(v==16 for v in r['final_balances'].values()) if m=='Opus 5.5' else r['exit_after_win'] and sorted(r['final_balances'].values())==[0]*(r['n']-1)+[8])]
     candidates.sort(key=lambda r:(r['n']!=4,r['rep']))
     f=fig()
     if not candidates:
@@ -133,7 +134,7 @@ def timeline(m,filename):
       else: votes.append((i,e))
       for a in agents: hist[a].append(balances[a])
     assert all(balances[a]==r['final_balances'][a] for a in agents), 'Event reconstruction differs from final balances'
-    heading='Opus compounds cooperation' if m=='Opus' else 'Sol’s pooler wins and exits'
+    heading='Opus compounds cooperation' if m=='Opus 5.5' else 'Sol’s pooler wins and exits'
     subtitle=f"Board episode r{r['rep']} · N={r['n']} · balance after each transfer, play, or end vote"
     title(f,heading,subtitle); ax=f.add_axes([.10,.23,.86,.39]); greys=['#999999','#BBBBBB','#777777','#CCCCCC','#666666','#AAAAAA','#888888']
     for i,a in enumerate(agents): ax.step(range(len(ev)+1),hist[a],where='post',label=a+(' (pooler)' if a==r['pooler'] else ''),color=color(m) if a==r['pooler'] else greys[i%len(greys)],lw=2.2 if a==r['pooler'] else 1.5,alpha=.95)
@@ -147,12 +148,12 @@ def timeline(m,filename):
                   arrowprops=dict(arrowstyle='->',color='#888888',lw=.7),annotation_clip=False)
     if votes:
       x,e=votes[0]; ax.axvline(x,color='#999999',lw=.8,ls='--')
-    if m=='Sol':
+    if m=='Sol 6.1':
       transfers=[e for e in ev if e['action']=='transfer']; f.text(.10,.025,'Pool transfers: '+', '.join(f"{e['actor']} → {e['to']} ({e['amount']})" for e in transfers),fontsize=11,color='#555555')
     save(f,filename)
 
 def table():
-    f=fig(); title(f,'The board changes behavior—and outcomes','Counts use the relevant eligible episodes as the denominator')
+    f=plt.figure(figsize=(13,5.4)); title(f,'The board changes behavior—and outcomes','Counts use the relevant eligible episodes as the denominator')
     lines=[]
     for n in ns:
      for m in models:
@@ -162,14 +163,53 @@ def table():
        pools=[r for r in rs if r['pooled']]; wins=[r for r in pools if r['pool_won']]
        fmt=lambda k,n:f'{k} of {n}' if n else '—'
        lines.append([m+' '+('board' if c=='board' else 'no board')+(f' · N={n}' if len(ns)>1 else ''),fmt(len(pools),len(rs)),fmt(len(wins),len(pools)),fmt(sum(r['repaid_any'] for r in wins),len(wins)),fmt(sum(r['exit_after_win'] for r in wins),len(wins)),f"{np.median([r['multiplier'] for r in rs]):g}×"])
-    ax=f.add_axes([.04,.17,.92,.58]); ax.axis('off'); tab=ax.table(cellText=lines,colLabels=['Condition','Pooled','Pooler\nwon','Shared\nafter win','Ended after\nwin','Median group\nmultiplier'],cellLoc='center',colLoc='center',loc='center',colWidths=[.22,.14,.14,.16,.16,.18]); tab.auto_set_font_size(False); tab.set_fontsize(13); tab.scale(1,2.2 if len(lines)<=4 else max(1.55,13/len(lines)))
+    ax=f.add_axes([.04,.17,.92,.58]); ax.axis('off'); tab=ax.table(cellText=lines,colLabels=['Condition','Pooled','Pooler\nwon','Shared\nafter win','Ended after\nwin','Median group\nmultiplier'],cellLoc='center',colLoc='center',loc='center',colWidths=[.28,.12,.13,.15,.15,.17]); tab.auto_set_font_size(False); tab.set_fontsize(13); tab.scale(1,2.2 if len(lines)<=4 else max(1.55,13/len(lines)))
     for j in range(6): tab[(0,j)].set_height(tab[(0,j)].get_height()*1.8)
     for (i,j),cell in tab.get_celld().items():
       cell.set_edgecolor('white'); cell.set_facecolor('#f2f4f5' if i==0 else ('#f8f8f8' if i%2==0 else 'white'))
       if i==0: cell.get_text().set_weight('bold')
-      elif j==0: cell.get_text().set_color(color(model(next(r for r in rows if model(r) in lines[i-1][0])))); cell.get_text().set_weight('bold')
+      elif j==0: cell.get_text().set_color(color(next(m for m in models if lines[i-1][0].startswith(m+' ')))); cell.get_text().set_weight('bold')
     f.text(.05,.08,'Pooler won / shared / ended use pooled / winning pools / winning pools, respectively.',fontsize=11,color='#666666')
     save(f,'07_summary_table.png')
+
+def generations():
+    f=fig(); title(f,'Sol generations: pooling and sharing','Completed board episodes · 95% Wilson intervals')
+    ax=f.add_axes([.10,.19,.86,.55]); labels=['Full pool','Partial pool','Shared after win']
+    for i, key in enumerate(('pooled','partial_pool','repaid_any')):
+        for j, m in enumerate(('Sol 5.6','Sol 6.1')):
+            rs=[r for r in rows if model(r)==m and r['condition']=='board']
+            if key=='repaid_any': rs=[r for r in rs if r['pool_won'] is True]
+            k,z=rate(rs,key); label_rate(ax,i*3+j,k,z,color(m))
+    ax.set_xticks([.5,3.5,6.5],labels); ax.set_ylim(0,1.25)
+    ax.set_yticks([0,.5,1],['0%','50%','100%']); ax.grid(axis='y',color='#eeeeee'); ax.set_axisbelow(True)
+    from matplotlib.patches import Patch
+    ax.legend(handles=[Patch(color=color(m),label=m) for m in ('Sol 5.6','Sol 6.1')],frameon=False,loc='upper right',ncol=2)
+    save(f,'08_generations.png')
+
+def exit_control():
+    f=plt.figure(figsize=(12,8)); title(f, 'Final concentration with and without an end vote', 'Board · N=4 · pooled wins · Wilson 95% intervals for contributors whole')
+    gs=f.add_gridspec(4,10,left=.10,right=.97,top=.78,bottom=.07,hspace=.9,wspace=.3)
+    a=f.add_subplot(gs[0:2,0:5]); b=f.add_subplot(gs[0:2,5:10])
+    for i,m in enumerate(('Sol 6.1','Opus 5.5')):
+        for j,(label,source) in enumerate((('End vote',rows),('Fixed 8 rounds',control_rows))):
+            rs=[r for r in source if r['status']=='completed' and model(r)==m and r['n']==4 and r['condition']=='board' and r['pool_won'] is True]
+            x=i*3+j
+            if rs:
+                v=float(np.median([r['max_final_share'] for r in rs])); a.bar(x,v,color=color(m),alpha=1 if j==0 else .5); a.text(x,v+.03,f'{v:.0%}\n(n={len(rs)})',ha='center',fontsize=10)
+            label_rate(b,x,sum(bool(r['contributors_whole']) for r in rs),len(rs),color(m),j==1)
+    for ax in (a,b):
+        ax.set_xticks([.5,3.5],['Sol 6.1','Opus 5.5']); ax.set_ylim(0,1.25); ax.set_yticks([0,.5,1],['0%','50%','100%']); ax.grid(axis='y',color='#eeeeee'); ax.set_axisbelow(True)
+    a.set_title('Median largest-holder share',loc='left'); b.set_title('All contributors at least whole',loc='left')
+    f.text(.10,.42,'Within each model: end vote (left), fixed 8 rounds (right)',fontsize=10,color='#555555')
+    sub=gs[2:4,:].subgridspec(2,20,hspace=.55,wspace=.15)
+    for i,m in enumerate(('Sol 6.1','Opus 5.5')):
+        rs=sorted([r for r in control_rows if model(r)==m and r['n']==4 and r['condition']=='board'],key=lambda r:r['rep'])
+        ymax=max([max(r['final_balances'].values()) for r in rs] or [1])
+        for j,r in enumerate(rs[:20]):
+            ax=f.add_subplot(sub[i,j]); vals=r['final_balances']; ax.bar(range(len(vals)),list(vals.values()),color=[color(m) if agent==r['pooler'] else tint(color(m)) for agent in vals]); ax.set_ylim(0,ymax*1.1); ax.set_xticks([]); ax.set_yticks([]); ax.set_title(str(r['rep']) + ('*' if r['status'] != 'completed' else ''),fontsize=7)
+            if j==0: ax.set_ylabel(m,fontsize=9,color=color(m))
+    f.text(.10,.015,'* Incomplete episode; excluded from comparisons.',fontsize=9,color='#666666')
+    save(f,'09_exit_control.png')
 
 if __name__=='__main__':
     parser=argparse.ArgumentParser(description=__doc__); parser.add_argument('run_dirs',nargs='+',type=Path); args=parser.parse_args(); rows=[]
@@ -179,18 +219,21 @@ if __name__=='__main__':
       for path in sorted((run/'episodes').glob('*/episode.json')):
        try:
         data=json.loads(path.read_text()); summary=data['summary']
-        key=(summary['model'],summary['condition'],summary['n'],summary['rep'])
+        key=(episode_variant(data, run),summary['model'],summary['condition'],summary['n'],summary['rep'])
         stamp=path.stat().st_mtime_ns
        except (OSError,ValueError,KeyError) as exc:
         print(f'Skipping {path}: {exc}',file=sys.stderr); continue
        if key not in selected or (stamp,str(path)) > (selected[key][0],str(selected[key][1])):
         selected[key]=(stamp,path,data)
     for _,path,data in selected.values():
-      r,_,_=metrics(data)
-      if r['status']=='completed': r['_path']=path; rows.append(r)
+      r,_,_=metrics(data, episode_variant(data, path.parents[2]))
+      r['_path']=path; rows.append(r)
     if not rows: sys.exit('No completed episodes found.')
+    control_rows = [r for r in rows if r['variant'] == 'novote']
+    rows = [r for r in rows if r['variant'] == 'main' and r['status'] == 'completed']
     ns=sorted({r['n'] for r in rows}); models=sorted({model(r) for r in rows},key=lambda m:(list(COLORS).index(m) if m in COLORS else len(COLORS),m)); out=args.run_dirs[0]/'slides'; out.mkdir(parents=True,exist_ok=True)
     for old in out.glob('01*_final_balances.png'): old.unlink()
-    balances(); rates(); outcomes(); multipliers(); timeline('Opus','05_opus_chain.png'); timeline('Sol','06_sol_defection.png'); table()
+    exit_control(); balances(); rates(); outcomes(); multipliers(); timeline('Opus 5.5','05_opus_chain.png'); timeline('Sol 6.1','06_sol_defection.png'); table(); generations()
     for (n,m,c),count in sorted(Counter((r['n'],model(r),r['condition']) for r in rows).items()): print(f'N={n} {m} {c}: {count}')
+    for (n,m,c),count in sorted(Counter((r['n'],model(r),r['condition']) for r in control_rows).items()): print(f'NOVOTE N={n} {m} {c}: {count}')
     print(f'Wrote figures to {out}')

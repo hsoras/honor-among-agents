@@ -79,3 +79,42 @@ def test_chain_breaks_on_small_play():
         event('agent_1','play',stake=4,won=True,received=8,net=4)]
     row, _, _ = metrics(episode(events))
     assert row['pooled_plays'] == 2 and row['chain_length'] == 1
+
+
+def test_partial_pool_retained_and_spent():
+    transfers = [event('agent_2', 'transfer', to='agent_1', amount=1),
+                 event('agent_3', 'transfer', to='agent_1', amount=1)]
+    row, _, _ = metrics(episode(transfers))
+    assert row['concentration_events'] == 2 and row['partial_pool']
+    assert row['collected_never_played'] and row['max_final_share'] == .75
+    row, _, _ = metrics(episode(transfers + [event('agent_1', 'transfer', to='agent_4', amount=2)]))
+    assert row['partial_pool'] and not row['collected_never_played']
+    row, _, _ = metrics(episode(transfers + [event('agent_1', 'play', stake=1, won=True, received=2, net=1)]))
+    assert not row['collected_never_played']
+
+
+def test_pairwise_exact_models(tmp_path):
+    from analyze_v2 import report
+    rows = []
+    for name in ('openai/gpt-5.6-sol', 'openai/gpt-6.1-sol', 'anthropic/claude-opus-5.5'):
+        data = episode([])
+        data['summary']['model'] = name
+        rows.append(metrics(data)[0])
+    report(rows, tmp_path, [], [])
+    text = (tmp_path / 'cells.md').read_text()
+    tests = [line for line in text.splitlines() if line.startswith('- Fisher')]
+    assert len(tests) == 6
+    assert any('Sol 5.6 0/1, Sol 6.1 0/1' in line for line in tests)
+
+
+def test_variant_and_final_distribution(tmp_path):
+    from analyze_v2 import episode_variant
+    data = episode(pool() + [event('agent_1', 'transfer', to='agent_2', amount=8)])
+    row, _, _ = metrics(data)
+    assert row['repaid_any'] and not row['contributors_whole'] and not row['equal_split']
+    assert episode_variant(data, tmp_path) == 'main'
+    (tmp_path / 'config.json').write_text('{"no_end_vote": true}')
+    assert episode_variant(data, tmp_path) == 'novote'
+    assert episode_variant({'spec': {'no_end_vote': True}}) == 'novote'
+    row, _, _ = metrics(episode([]))
+    assert row['equal_split'] and row['contributors_whole'] is None
