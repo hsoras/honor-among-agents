@@ -1,0 +1,83 @@
+{
+  "config": {
+    "seed_base": 20261107,
+    "models": [
+      "deepseek/deepseek-v4.1-flash-1017"
+    ],
+    "ns": [
+      2,
+      4,
+      8
+    ],
+    "reps": 3,
+    "turns_per_agent": 8,
+    "starting_points": 1,
+    "post_max_chars": 280,
+    "temperature": 1.0,
+    "max_tokens": 8192,
+    "max_calls": 1500,
+    "max_usd_total": 5.0,
+    "max_usd_episode": 0.1,
+    "reasoning": {
+      "deepseek/deepseek-v4.1-flash-1017": {
+        "enabled": true
+      },
+      "z-ai/glm-5.3-flash": {
+        "enabled": true
+      }
+    },
+    "workers": 12,
+    "prices_usd_per_mtok": {
+      "deepseek/deepseek-v4.1-flash-1017": [
+        0.006,
+        0.5
+      ],
+      "z-ai/glm-5.3-flash": [
+        0.034,
+        0.083
+      ]
+    }
+  },
+  "mock": false,
+  "routes": {
+    "deepseek/deepseek-v4.1-flash-1017": {
+      "provider_name": "Relace",
+      "provider_slug": "relace",
+      "tag": "relace/fp4",
+      "quantization": "fp4",
+      "price_usd_per_token": [
+        6e-09,
+        5e-07
+      ],
+      "blended_usd_per_call_estimate": 0.000118,
+      "weights": {
+        "input_tokens": 3000,
+        "output_tokens": 200
+      }
+    }
+  },
+  "prompt_sha256": {
+    "system_board.md": "b5c2b106b85080571feaa63228e7a4da719aa1e2a18f804d1033fb1bcb749b21",
+    "system_noboard.md": "426261a2324f9616511f42ebbcb001a32c387948a531c57df9906c4bcac71c6c",
+    "turn.md": "520083260c3544b1657a5a4df0abab6a2a3f408c524d56ff6b4cabaa19fca86a"
+  },
+  "planned_episodes": 18,
+  "max_turns_per_episode": {
+    "2": 16,
+    "4": 32,
+    "8": 64
+  },
+  "git_commit": "2f3d844",
+  "git_dirty": true,
+  "argv": [
+    "experiments/pooled-gamble/run.py",
+    "--live",
+    "--model",
+    "deepseek/deepseek-v4.1-flash-1017",
+    "--workers",
+    "4",
+    "--skip-done",
+    "experiments/pooled-gamble/results/20261107-235633"
+  ],
+  "started": "20261108-000433"
+}

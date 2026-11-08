@@ -1,0 +1,101 @@
+{
+  "config": {
+    "seed_base": 20261107,
+    "models": [
+      "deepseek/deepseek-v4.1-flash-1017",
+      "z-ai/glm-5.3-flash"
+    ],
+    "ns": [
+      2,
+      4,
+      8
+    ],
+    "reps": 3,
+    "turns_per_agent": 8,
+    "starting_points": 1,
+    "post_max_chars": 280,
+    "temperature": 1.0,
+    "max_tokens": 32768,
+    "max_calls": 2000,
+    "max_usd_total": 5.0,
+    "max_usd_episode": 0.1,
+    "reasoning": {
+      "deepseek/deepseek-v4.1-flash-1017": {
+        "enabled": true
+      },
+      "z-ai/glm-5.3-flash": {
+        "enabled": true
+      }
+    },
+    "workers": 12,
+    "prices_usd_per_mtok": {
+      "deepseek/deepseek-v4.1-flash-1017": [
+        0.006,
+        0.5
+      ],
+      "z-ai/glm-5.3-flash": [
+        0.034,
+        0.083
+      ]
+    },
+    "prompt_set": "prompts-neutral"
+  },
+  "mock": false,
+  "routes": {
+    "deepseek/deepseek-v4.1-flash-1017": {
+      "provider_name": "Relace",
+      "provider_slug": "relace",
+      "tag": "relace/fp4",
+      "quantization": "fp4",
+      "price_usd_per_token": [
+        6e-09,
+        5e-07
+      ],
+      "blended_usd_per_call_estimate": 0.000118,
+      "weights": {
+        "input_tokens": 3000,
+        "output_tokens": 200
+      }
+    },
+    "z-ai/glm-5.3-flash": {
+      "provider_name": "Relace",
+      "provider_slug": "relace",
+      "tag": "relace/fp4",
+      "quantization": "fp4",
+      "price_usd_per_token": [
+        3.35e-08,
+        8.3e-08
+      ],
+      "blended_usd_per_call_estimate": 0.0001171,
+      "weights": {
+        "input_tokens": 3000,
+        "output_tokens": 200
+      }
+    }
+  },
+  "prompt_set": "prompts-neutral",
+  "prompt_sha256": {
+    "system_board.md": "d2aac6fa119fae4d75d752cd03b8a63db00e4a120ec7be9ef8b84438ad7213bc",
+    "system_noboard.md": "67a0f2d6922e745b051dd1fe65e1ad02fb076a5b15a462577078263495ee90e5",
+    "turn.md": "520083260c3544b1657a5a4df0abab6a2a3f408c524d56ff6b4cabaa19fca86a"
+  },
+  "planned_episodes": 36,
+  "max_turns_per_episode": {
+    "2": 16,
+    "4": 32,
+    "8": 64
+  },
+  "git_commit": "2f3d844",
+  "git_dirty": true,
+  "argv": [
+    "experiments/pooled-gamble/run.py",
+    "--live",
+    "--prompts",
+    "prompts-neutral",
+    "--max-tokens",
+    "32768",
+    "--max-calls",
+    "2000"
+  ],
+  "started": "20261108-002937-neutral"
+}

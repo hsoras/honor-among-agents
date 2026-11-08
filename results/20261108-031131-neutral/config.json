@@ -1,0 +1,90 @@
+{
+  "config": {
+    "seed_base": 20261107,
+    "models": [
+      "openai/gpt-6.1-sol"
+    ],
+    "ns": [
+      4
+    ],
+    "reps": 1,
+    "turns_per_agent": 8,
+    "starting_points": 1,
+    "post_max_chars": 280,
+    "temperature": null,
+    "max_tokens": 32768,
+    "max_calls": 1500,
+    "max_usd_total": 5.0,
+    "max_usd_episode": 0.75,
+    "reasoning": {
+      "deepseek/deepseek-v4.1-flash-1017": {
+        "enabled": true
+      },
+      "z-ai/glm-5.3-flash": {
+        "enabled": true
+      },
+      "openai/gpt-6.1-sol": {
+        "enabled": true
+      }
+    },
+    "workers": 12,
+    "prices_usd_per_mtok": {
+      "deepseek/deepseek-v4.1-flash-1017": [
+        0.006,
+        0.5
+      ],
+      "z-ai/glm-5.3-flash": [
+        0.034,
+        0.083
+      ]
+    },
+    "prompt_set": "prompts-neutral"
+  },
+  "mock": false,
+  "routes": {
+    "openai/gpt-6.1-sol": {
+      "provider_name": "OpenAI",
+      "provider_slug": "openai",
+      "tag": "openai/flex",
+      "quantization": "unknown",
+      "price_usd_per_token": [
+        1e-06,
+        5e-06
+      ],
+      "blended_usd_per_call_estimate": 0.004,
+      "weights": {
+        "input_tokens": 3000,
+        "output_tokens": 200
+      }
+    }
+  },
+  "prompt_set": "prompts-neutral",
+  "prompt_sha256": {
+    "system_board.md": "d2aac6fa119fae4d75d752cd03b8a63db00e4a120ec7be9ef8b84438ad7213bc",
+    "system_noboard.md": "67a0f2d6922e745b051dd1fe65e1ad02fb076a5b15a462577078263495ee90e5",
+    "turn.md": "520083260c3544b1657a5a4df0abab6a2a3f408c524d56ff6b4cabaa19fca86a"
+  },
+  "planned_episodes": 2,
+  "max_turns_per_episode": {
+    "4": 32
+  },
+  "git_commit": "2f3d844",
+  "git_dirty": true,
+  "argv": [
+    "run.py",
+    "--live",
+    "--prompts",
+    "prompts-neutral",
+    "--max-tokens",
+    "32768",
+    "--max-usd-episode",
+    "0.75",
+    "--add-model",
+    "openai/gpt-6.1-sol",
+    "--ns",
+    "4",
+    "--reps",
+    "1"
+  ],
+  "started": "20261108-031131-neutral"
+}

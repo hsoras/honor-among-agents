@@ -1,0 +1,11 @@
+__pycache__/
+*.pyc
+.DS_Store
+.env
+*.lock
+results/spend_ledger.json
+results/episode_table.md
+
+# raw run data (kept locally, not committed)
+*.jsonl
+results/*/episodes/
