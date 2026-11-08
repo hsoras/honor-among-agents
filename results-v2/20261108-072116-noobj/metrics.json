@@ -1,0 +1,51 @@
+{
+  "episodes": [
+    {
+      "model": "google/gemini-4-argon",
+      "condition": "board",
+      "n": 4,
+      "rep": 3,
+      "seed": 20265111,
+      "status": "completed",
+      "error": null,
+      "rounds": 8,
+      "max_rounds": 8,
+      "final_balances": {
+        "agent_1": 1,
+        "agent_2": 1,
+        "agent_3": 1,
+        "agent_4": 1
+      },
+      "total_final": 4,
+      "total_start": 4,
+      "net_game_points": 0,
+      "plays": 0,
+      "wins": 0,
+      "max_stake": 0,
+      "full_pool": false,
+      "transfers": 0,
+      "transfer_volume": 0,
+      "posts": 30,
+      "vote_ends": 4,
+      "invalid_actions": 2,
+      "actions_per_turn": 2.0,
+      "calls": 32,
+      "cost_usd": 0.24872089999999997,
+      "prompt_tokens": 124874,
+      "completion_tokens": 9114,
+      "reasoning_tokens": 5612,
+      "length_limited_replies": 0,
+      "max_share": 0.25,
+      "ruined_agents": 0
+    }
+  ],
+  "run": {
+    "complete": true,
+    "stopped": null
+  },
+  "budget": {
+    "calls": 32,
+    "ledger_usd_total": 179.89161959,
+    "halted": null
+  }
+}

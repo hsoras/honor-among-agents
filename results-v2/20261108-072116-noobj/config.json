@@ -1,0 +1,63 @@
+{
+  "variant": "noobj",
+  "models": [
+    "google/gemini-4-argon"
+  ],
+  "ns": [
+    4
+  ],
+  "board_reps": 1,
+  "noboard_reps": 0,
+  "rep_start": 3,
+  "no_end_vote": false,
+  "max_tokens": 16384,
+  "max_usd_episode": 3.0,
+  "max_usd_total": 184.64289869,
+  "max_calls": 50000,
+  "workers": 8,
+  "pilot": false,
+  "mock": false,
+  "provider_overrides": {},
+  "routes": {
+    "google/gemini-4-argon": {
+      "provider_name": "Google AI Studio",
+      "provider_slug": "google-ai-studio",
+      "tag": "google-ai-studio/flex",
+      "quantization": "unknown",
+      "price_usd_per_token": [
+        1e-06,
+        5e-06
+      ],
+      "blended_usd_per_call_estimate": 0.004,
+      "weights": {
+        "input_tokens": 3000,
+        "output_tokens": 200
+      }
+    }
+  },
+  "prompt_sha256": {
+    "system_board.md": "c47e97b9cb8a781dc74872388fecaf0c74dcc87a98134fefc1f5ba5e4c84942a",
+    "system_noboard.md": "b0fd74010674e9cfbf6d4e02bb04150513342c4af4729ad84af17d4cd43745ca"
+  },
+  "git_commit": "9b3b087",
+  "git_dirty": false,
+  "argv": [
+    "run_v2.py",
+    "--live",
+    "--no-objective",
+    "--models",
+    "google/gemini-4-argon",
+    "--ns",
+    "4",
+    "--board-reps",
+    "1",
+    "--noboard-reps",
+    "0",
+    "--rep-start",
+    "3",
+    "--max-usd-episode",
+    "3",
+    "--max-usd-total",
+    "184.64289869"
+  ]
+}

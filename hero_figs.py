@@ -35,6 +35,36 @@ def ci(ax,x,y,k,n,c,hollow=False):
  ax.scatter([p],[y],s=85,facecolor='white' if hollow else c,edgecolor=c,linewidth=2,zorder=3)
  ax.text(x,y,f'{k}/{n}',va='center',fontsize=11,weight='bold',color=c)
 
+# Focused board comparison; invoke with --board-focus to render only this slide.
+if '--board-focus' in __import__('sys').argv:
+ from scipy.stats import binomtest
+ focus=[('Opus 5.5','Claude Opus 5.5','#0072B2'),('Fable 5.1','Claude Fable 5.1','#332288'),('Sol 6.1','GPT-6.1 Sol','#D55E00'),('Astra 6','GPT-6 Astra','#882255'),('Gemini 4 Argon','Gemini 4 Argon','#56B4E9')]
+ recorded=[r for r in rows if r['variant']=='main' and r['n']==4]
+ f=base('Control 1: take away the board and nobody pools', "Same game, same seeds, same 'maximize your own points' prompt · only the message board removed · N=4")
+ f.texts[0].set_fontsize(19); f.texts[1].set_fontsize(9.5)
+ ax=f.add_axes([.29,.25,.57,.53]); ps={}
+ for i,(m,label,c) in enumerate(focus):
+  groups=[data(m,cond,recorded) for cond in ('board','noboard')]
+  for rs in groups: assert len(rs)==20,(m,len(rs))
+  vals=[sum(r['pooled'] for r in rs) for rs in groups]
+  print(m,[(k,len(rs),sum(r['status']=='completed' for r in rs)) for k,rs in zip(vals,groups)])
+  ax.plot([vals[0]/20,vals[1]/20],[i-.14,i+.14],color=c,alpha=.4,lw=2)
+  for j,(rs,k) in enumerate(zip(groups,vals)):
+   y=i+(-.14 if j==0 else .14); lo,hi=s.wilson(k,20)
+   ax.plot([lo,hi],[y,y],color=c,lw=1.5)
+   ax.scatter([k/20],[y],s=55,facecolor=c if j==0 else 'white',edgecolor=c,linewidth=1.5,zorder=3)
+   ax.annotate(f'{k}/20',(k/20,y),xytext=(5,4 if j==0 else -11),textcoords='offset points',fontsize=8,color=c,weight='bold')
+  a={r['rep']:r['pooled'] for r in groups[0]}; b={r['rep']:r['pooled'] for r in groups[1]}; assert a.keys()==b.keys()
+  discord=[sum(bool(a[k]) and not b[k] for k in a),sum(bool(b[k]) and not a[k] for k in a)]
+  ps[m]=binomtest(min(discord),sum(discord),.5).pvalue if sum(discord) else 1
+ ax.set_yticks(range(5),[x[1] for x in focus],fontsize=10); ax.set_ylim(4.6,-.6); ax.set_xlim(-.04,1.08)
+ ax.set_xticks([0,.25,.5,.75,1],['0%','25%','50%','75%','100%']); ax.grid(axis='x',color='#e8e8e8'); ax.set_axisbelow(True); ax.tick_params(axis='y',length=0); ax.spines[['left','right','top']].set_visible(False)
+ f.text(.29,.155,'● with board    ○ without board    ·    95% Wilson intervals',fontsize=9,color='#444')
+ f.text(.055,.095,'Fable without board: 15 completed + 5 truncated; Gemini with board: 17 completed; 3 incomplete.',fontsize=8.5,color='#555')
+ f.text(.055,.05,f"All 20 recorded games counted. Exact two-sided McNemar p (paired by rep): Opus {ps['Opus 5.5']:.5g}; Sol {ps['Sol 6.1']:.5g}.",fontsize=8.5,color='#555')
+ save(f,'11b_board_switch_focus.png')
+ raise SystemExit
+
 f=base('Three models, three approaches','Board on · 4 agents · one example final balance per model')
 for i,(m,headline,vals) in enumerate([('Opus 5.5','Keeps its word',[16]*4),('Sol 6.1','Takes the pot',[8,0,0,0]),('Gemini 4 Argon',"Won’t trust anyone",[1]*4)]):
  x=.055+i*.315; c=s.color(m); rs=data(m); wins=[r for r in rs if r['pooled'] and r['pool_won']]; matches=[r for r in rs if sorted(r['final_balances'].values())==sorted(vals)]
