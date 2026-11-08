@@ -92,7 +92,7 @@ Sentence roles, in order:
   Astra 0/12 (OpenAI 0/24). GPT-5.6 Sol kept winnings in 4/5 small pools.
 - Fable pools rarely (6/20 vs Opus 16/20): a cautious cooperator. Astra mirrors Sol (exit after win 11/12).
 - Promise evidence: in all 24 OpenAI winning pools the pooler publicly promised repayment before collecting;
-  all 24 broken. Frame as broken promises, not proven lies (Sol reasoning is encrypted).
+  all 24 broken. Frame as broken promises, not proven lies (Sol reasoning is mostly hidden: summaries in 24 of 486 turns).
 - Report carefully: two models per lab is suggestive, not a lab effect.
 - Abstract update: replace "7-model" with "8 models from 3 labs" and add the Anthropic/OpenAI split sentence.
 
@@ -119,7 +119,7 @@ Sentence roles, in order:
 - Limitations: prompt instructs self-interest (Sol arguably follows instructions; frame as promise-keeping
   when breaking pays); one-shot game, no reputation; possible test awareness; N=4 only; fixed turn order
   (agent_1 always proposes); same-model groups only; provider/host differences (Sol control on Bedrock);
-  reasoning visibility differs (Sol encrypted); headline metric chosen post hoc (robust across alternatives);
+  reasoning visibility differs (Sol mostly hidden); headline metric chosen post hoc (robust across alternatives);
   behavior categories from LLM readers (numbers from code); Gemini 280-char rejections and 3 incomplete games;
   provider-default reasoning/temperature; model IDs as requested, served model not verifiable.
 - Dual use: fake points only; a benchmark for promise-keeping; transcripts show persuasion/defection patterns

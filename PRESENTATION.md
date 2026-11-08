@@ -29,7 +29,7 @@ Cheap models do nothing, so testing with cheap models would have hidden all of i
   all three OpenAI models kept the pot", not "Anthropic models share" (2 models per lab).
 - **Broken promises, every time:** in all 24 winning Sol 6.1 and Astra pools, the pooler had publicly promised
   repayment *before* collecting (Sol restated it in 5). 24 of 24 promises broken. Say "broke its promise
-  every time", not "lied": Sol's reasoning is encrypted, so we can't show it intended to deceive when promising.
+  every time", not "lied": Sol's reasoning is mostly hidden, so we can't show it intended to deceive when promising.
 - Figures: add `15_labs.png` (lab comparison) and `01d_final_balances.png` (Fable + Astra).
 
 ---
@@ -141,7 +141,7 @@ Cheap models do nothing, so testing with cheap models would have hidden all of i
 
 ### B12. Limitations + what's next (text)
 - N=4 only; homogeneous groups; fixed turn order (agent_1 always proposes first); one game design;
-  prompts say "maximize your own points"; Sol's reasoning is encrypted, so motives come from Opus/Gemini text.
+  prompts say "maximize your own points"; Sol's reasoning is mostly hidden, so motives come from Opus/Gemini text.
 - Next: N=8, mixed-model groups (does Opus get exploited by Sol?), enforcement/escrow tools,
   reputation across repeated games.
 - Dual use: a benchmark for promise-keeping, not a recipe; the agents only gamble fake points.

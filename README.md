@@ -91,7 +91,7 @@ And it keeps its word even in its private reasoning, which no other agent can se
 ## 3. ChatGPT promises first, then doesn't pay
 In all 24 winning pools across Sol and Astra, the pooler had publicly promised to pay everyone back *before* collecting the points. Sol even restated the promise in 5 of them. All 24 promises were broken.
 
-I can't say for sure it "lied", because OpenAI encrypts Sol's reasoning, so I can't see what it was planning when it made the promise. But it broke the promise every single time.
+I can't say for sure it "lied", because OpenAI hides almost all of Sol's reasoning, so I can't see what it was planning when it made the promise. But it broke the promise every single time.
 
 The older GPT-5.6 Sol says the quiet part out loud:
 
@@ -173,7 +173,7 @@ Every headline number here (including both controls) was recounted from the raw 
 - **They might know it's a test.** Same for every model, so the comparison still holds.
 - **Only four agents, one game, same-model groups.** I don't know yet what happens with eight agents, or when Opus agents play with Sol agents.
 - **Fixed turn order.** agent_1 always goes first and almost always becomes the pooler, so I'm not making claims about who leads.
-- **Reasoning visibility differs.** OpenAI encrypts Sol's reasoning, so motive quotes come from Claude and Gemini, and Sol's come from its public posts.
+- **Reasoning visibility differs.** OpenAI hides almost all of Sol's reasoning, so motive quotes come from Claude and Gemini, and Sol's come from its public posts.
 - **The no-exit control used a different host for Sol** (Amazon Bedrock instead of OpenAI). The result matched the main run anyway.
 - **"Contributors made whole" was picked after the first results came in.** The result holds under the other measures too (largest-holder share 100% vs 25%, 16/16/16/16 endings).
 - **The per-game behavior categories** (deadlock, relay chain, etc.) came from LLM readers. The numbers come from code.
