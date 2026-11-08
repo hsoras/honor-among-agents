@@ -113,7 +113,16 @@ Sol still left contributors whole 0 of 15 times. Opus did 13 of 15 (Fisher p = 0
 ## 5. It's the "maximize your own points" line
 The other obvious objection: every agent is told to maximize its own points, so maybe Sol is just following instructions. So I ran a second control where I cut that one paragraph out of the system prompt and kept everything else the same. Same game, same seeds.
 
-Without it, Sol pays everyone back. It left contributors whole 14 of 16 times (it was 0 of 12 with the line), and 14 of its 20 games ended 16/16/16/16, just like Opus (Fisher p = 0.000006). Opus barely changed: 13 of 15. Without the selfish goal, Sol and Opus are basically the same (p = 1.0). Gemini still sent zero points.
+Without it, both ChatGPT models pay everyone back. Sol left contributors whole 14 of 16 times (it was 0 of 12 with the line), and so did Astra (also 0 of 12 before). Most of their games ended 16/16/16/16, just like Opus (Fisher p = 0.000006 for each). The Claude models barely changed: Opus 13 of 15, Fable 13 of 16. Fable also stopped being so careful and pooled in all 20 games. Without the selfish goal, the two labs look the same: ChatGPT 28 of 32, Claude 26 of 31 (p = 0.73). Gemini still sent zero points.
+
+| Contributors made whole | Told to maximize own points | No objective |
+|---|---|---|
+| Claude Opus 5.5 | 12/14 | 13/15 |
+| Claude Fable 5.1 | 5/5 | 13/16 |
+| GPT-6.1 Sol | **0/12** | **14/16** |
+| GPT-6 Astra | **0/12** | **14/16** |
+
+The few misses without the line were all chains that lost a later stake. Not one pooler, from either lab, kept the money.
 
 So the difference isn't that ChatGPT can't keep a promise. It's that when its instructions say "look out for yourself", it follows the instructions over its own promise. Claude keeps its word either way.
 
@@ -156,10 +165,10 @@ GPT-5.6 Sol proposed pooling in most games, but the other agents usually wouldn'
 | Claude Haiku 5.5 | 0/20 | 0/20 | 0 | – | – |
 | GPT-6 Luna | 0/20 | 0/20 | 0 | – | – |
 
-Every headline number here (including both controls) was recounted from the raw game logs four separate times (the analysis script, me, and two independent agent checks), and every quote was checked word for word. See `results-v2/AUDIT.md`, `results-v2/verify_terra.md`, and `results-v2/verify_haiku.md`, plus `verify_noobj_terra.md` and `verify_noobj_haiku.md` for the no-objective control.
+Every headline number here (including both controls) was recounted from the raw game logs four separate times (the analysis script, me, and two independent agent checks), and every quote was checked word for word. See `results-v2/AUDIT.md`, `results-v2/verify_terra.md`, and `results-v2/verify_haiku.md`, plus `verify_noobj_terra.md`, `verify_noobj_haiku.md`, `verify_noobj2_terra.md` and `verify_noobj2_haiku.md` for the no-objective control.
 
 # Limitations
-- **The prompt tells them to be selfish.** I tested this directly: with the "maximize your own points" line removed, Sol keeps its promises (14 of 16). So Sol's broken promises come from following that instruction. Claude keeps its word with or without it.
+- **The prompt tells them to be selfish.** I tested this directly: with the "maximize your own points" line removed, Sol and Astra keep their promises (14 of 16 each). So their broken promises come from following that instruction. Claude keeps its word with or without it.
 - **It's a one-shot game.** There's no reputation and no next game, so defecting is the "rational" move. Models still differ a lot on it.
 - **They might know it's a test.** Same for every model, so the comparison still holds.
 - **Only four agents, one game, same-model groups.** I don't know yet what happens with eight agents, or when Opus agents play with Sol agents.

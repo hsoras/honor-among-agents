@@ -115,34 +115,46 @@ f.text(.055,.08,f'Wilson 95% intervals · pooled lab comparison: Fisher exact p 
 save(f,'15_labs.png')
 
 # Objective-removal comparison and per-game final balances.
-f=base('Remove “maximize your own points” and Sol pays everyone back',
-       'Same game, same seeds · only the goal paragraph removed · board on · N=4')
-f.texts[0].set_fontsize(17)
-a=f.add_axes([.28,.25,.31,.43])
-f.text(.055,.745,'Contributors made whole after a winning pool',fontsize=12,weight='bold')
-groups=[('Sol 6.1',main,'Told to maximize own points'),('Sol 6.1',noobj,'No objective given'),
-        ('Opus 5.5',main,'Told to maximize own points'),('Opus 5.5',noobj,'No objective given')]
-counts=[]
-for i,(m,source,label) in enumerate(groups):
- rs=[r for r in data(m,source=source) if r['pooled'] and r['pool_won']]
- k=sum(r['contributors_whole'] for r in rs); counts.append((k,len(rs)))
- ci(a,1.08,i,k,len(rs),s.color(m),source is main)
-a.plot([counts[0][0]/counts[0][1],counts[1][0]/counts[1][1]],[0,1],color=s.color('Sol 6.1'),alpha=.35,lw=2,zorder=0)
-a.set_yticks(range(4),[m+' · '+label for m,_,label in groups],fontsize=9)
-a.set_ylim(3.55,-.55); a.set_xlim(-.04,1.35)
+f=base('Removing the self-score objective changes OpenAI repayment',
+       'Board on · 4 agents · contributors whole after a winning pool')
+f.texts[0].set_fontsize(15.5)
+a=f.add_axes([.19,.25,.36,.45])
+models_labs=['Opus 5.5','Fable 5.1','Sol 6.1','Astra 6']
+counts={}
+for i,m in enumerate(models_labs):
+ c=s.color(m)
+ for source,dy in ((main,-.12),(noobj,.12)):
+  rs=[r for r in data(m,source=source) if r['pooled'] and r['pool_won']]
+  k=sum(r['contributors_whole'] for r in rs); n=len(rs); counts[m,source is noobj]=(k,n)
+  lo,hi=s.wilson(k,n); y=i+dy
+  a.plot([lo,hi],[y,y],color=c,lw=1.4,alpha=.7)
+  a.scatter([k/n],[y],s=48,facecolor=c if source is noobj else 'white',edgecolor=c,linewidth=1.7,zorder=3)
+  a.annotate(f'{k}/{n}',(k/n,y),xytext=(0,7 if source is main else -11),textcoords='offset points',ha='center',fontsize=8,color=c,weight='bold')
+ x0=counts[m,False][0]/counts[m,False][1]; x1=counts[m,True][0]/counts[m,True][1]
+ a.plot([x0,x1],[i-.12,i+.12],color=c,lw=2,alpha=.45,zorder=0)
+a.set_yticks(range(4),models_labs,fontsize=10,weight='bold')
+a.set_ylim(3.55,-.55); a.set_xlim(-.08,1.10)
 a.set_xticks([0,.5,1],['0%','50%','100%']); a.grid(axis='x',color='#e8e8e8'); a.set_axisbelow(True)
 a.tick_params(axis='y',length=0); a.spines[['left','right','top']].set_visible(False)
-sol=sorted(data('Sol 6.1',source=noobj),key=lambda r:r['rep'])
-f.text(.655,.745,'Sol 6.1 · final balances',fontsize=12,weight='bold',color=s.color('Sol 6.1'))
-f.text(.655,.705,'20 games · 4 agents per game',fontsize=9,color='#666')
-for i,r in enumerate(sol):
- x=.655+(i%5)*.062; y=.47-(i//5)*.077
- ax=f.add_axes([x,y,.052,.058]); vals=list(r['final_balances'].values())
- ax.bar(range(4),vals,color=s.color('Sol 6.1'),width=.8); ax.set_ylim(0,16)
- ax.set_xticks([]); ax.set_yticks([]); ax.spines[['left','right','top']].set_visible(False); ax.spines['bottom'].set_color('#bbb')
-f.text(.655,.19,'14 of 20 games: 16 / 16 / 16 / 16',fontsize=9,weight='bold',color=s.color('Sol 6.1'))
-p=s.fisher_exact([[counts[0][0],counts[0][1]-counts[0][0]],[counts[1][0],counts[1][1]-counts[1][0]]]).pvalue
-f.text(.055,.08,f'Wilson 95% intervals · Sol comparison: two-sided Fisher exact p = {p:.3g} · bars share a 0–16 scale',fontsize=9,color='#555')
+f.text(.055,.72,'ANTHROPIC',fontsize=8,color='#777',weight='bold')
+f.text(.055,.49,'OPENAI',fontsize=8,color='#777',weight='bold')
+f.text(.19,.16,'○ told to maximize own points    ● no objective given',fontsize=8.5,color='#444')
+f.text(.60,.75,'Final balances · no objective',fontsize=11,weight='bold')
+f.text(.60,.715,'20 games per model · 4 agents per game',fontsize=8.5,color='#666')
+for j,m in enumerate(('Sol 6.1','Astra 6')):
+ rs=sorted(data(m,source=noobj),key=lambda r:r['rep'])
+ f.text(.60,.665-j*.245,m,fontsize=10,weight='bold',color=s.color(m))
+ for i,r in enumerate(rs):
+  x=.60+(i%10)*.032; y=.565-j*.245-(i//10)*.075
+  ax=f.add_axes([x,y,.026,.06]); ax.bar(range(4),list(r['final_balances'].values()),color=s.color(m),width=.8); ax.set_ylim(0,16)
+  ax.set_xticks([]); ax.set_yticks([]); ax.spines[['left','right','top']].set_visible(False); ax.spines['bottom'].set_color('#bbb')
+ps=[]
+for m in ('Sol 6.1','Astra 6'):
+ k0,n0=counts[m,False]; k1,n1=counts[m,True]
+ ps.append(s.fisher_exact([[k0,n0-k0],[k1,n1-k1]]).pvalue)
+ print(m, counts[m,False], counts[m,True], 'Fisher p', ps[-1])
+for m in models_labs: print(m,counts[m,False],counts[m,True])
+f.text(.055,.065,f'95% Wilson intervals · two-sided Fisher exact p: Sol {ps[0]:.3g}, Astra {ps[1]:.3g} · bars share 0–16 scale',fontsize=8.5,color='#555')
 save(f,'16_objective.png')
 
 s.rows=main; s.out=out; s.generations()

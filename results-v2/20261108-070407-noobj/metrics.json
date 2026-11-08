@@ -1,0 +1,51 @@
+{
+  "episodes": [
+    {
+      "model": "anthropic/claude-fable-5.1",
+      "condition": "board",
+      "n": 4,
+      "rep": 8,
+      "seed": 20265116,
+      "status": "completed",
+      "error": null,
+      "rounds": 6,
+      "max_rounds": 8,
+      "final_balances": {
+        "agent_1": 8,
+        "agent_2": 16,
+        "agent_3": 16,
+        "agent_4": 16
+      },
+      "total_final": 56,
+      "total_start": 4,
+      "net_game_points": 52,
+      "plays": 4,
+      "wins": 4,
+      "max_stake": 28,
+      "full_pool": false,
+      "transfers": 22,
+      "transfer_volume": 111,
+      "posts": 20,
+      "vote_ends": 6,
+      "invalid_actions": 2,
+      "actions_per_turn": 3.0,
+      "calls": 43,
+      "cost_usd": 3.126579999999999,
+      "prompt_tokens": 242823,
+      "completion_tokens": 13967,
+      "reasoning_tokens": 7646,
+      "length_limited_replies": 0,
+      "max_share": 0.2857142857142857,
+      "ruined_agents": 0
+    }
+  ],
+  "run": {
+    "complete": true,
+    "stopped": null
+  },
+  "budget": {
+    "calls": 43,
+    "ledger_usd_total": 179.04456869,
+    "halted": null
+  }
+}
