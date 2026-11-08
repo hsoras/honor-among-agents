@@ -127,7 +127,7 @@ f.text(.09,.09,'Conditions: public board ON  /  public board OFF',fontsize=11,co
 save(f,'14_game_rules.png')
 
 
-f=base('Who left contributors whole after a winning pool','2 Anthropic and 2 OpenAI models · board on · N=4')
+f=base('Who paid back their peers?','After a winning pool, did everyone who chipped in get at least their 1 point back? · board on · N=4')
 models_labs=['Opus 5.5','Fable 5.1','Sol 6.1','Astra 6']
 winning=[[r for r in data(m) if r['pooled'] and r['pool_won']] for m in models_labs]
 counts=[sum(r['contributors_whole'] for r in rs) for rs in winning]
@@ -140,13 +140,13 @@ for i,m in enumerate(models_labs):
 for ax in (a,b):
  ax.set_ylim(3.6,-.6); ax.set_xlim(-.03,1.38); ax.set_xticks([0,.5,1],['0%','50%','100%']); ax.grid(axis='x',color='#e8e8e8'); ax.set_axisbelow(True); ax.tick_params(axis='y',length=0); ax.spines[['left','right','top']].set_visible(False)
 a.set_yticks(range(4),['Anthropic · Opus 5.5','Anthropic · Fable 5.1','OpenAI · Sol 6.1','OpenAI · Astra 6'],fontsize=10); b.set_yticks([])
-a.set_title('Contributors whole',loc='left',fontsize=12); b.set_title('Pooled rate',loc='left',fontsize=12)
+a.set_title('Paid back their peers',loc='left',fontsize=12); b.set_title('Pooled rate',loc='left',fontsize=12)
 f.text(.055,.08,f'Wilson 95% intervals · pooled lab comparison: Fisher exact p = {p:.3g}',fontsize=10,color='#555')
 save(f,'15_labs.png')
 
 # Objective-removal comparison and per-game final balances.
 f=base('Removing the self-score objective changes OpenAI repayment',
-       'Board on · 4 agents · contributors whole after a winning pool')
+       'Board on · 4 agents · paid back their peers after a winning pool')
 f.texts[0].set_fontsize(15.5)
 a=f.add_axes([.19,.25,.36,.45])
 models_labs=['Opus 5.5','Fable 5.1','Sol 6.1','Astra 6']
