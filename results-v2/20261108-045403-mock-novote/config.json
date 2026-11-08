@@ -1,0 +1,40 @@
+{
+  "models": [
+    "openai/gpt-6.1-sol",
+    "anthropic/claude-opus-5.5"
+  ],
+  "ns": [
+    4
+  ],
+  "board_reps": 2,
+  "noboard_reps": 0,
+  "rep_start": 10,
+  "no_end_vote": true,
+  "max_tokens": 16384,
+  "max_usd_episode": 10.0,
+  "max_usd_total": 150.0,
+  "max_calls": 50000,
+  "workers": 8,
+  "pilot": false,
+  "mock": true,
+  "routes": {},
+  "prompt_sha256": {
+    "system_board.md": "298b3232724e3f5b70dba07c1e0cafd0468a1c5beb4801fe4e35ece8b46057c6",
+    "system_noboard.md": "dc103d0781c27aa5efabad2af01478e44e25646a139b7092fbd79be59e2eb0f4"
+  },
+  "git_commit": "084c2ef",
+  "git_dirty": true,
+  "argv": [
+    "run_v2.py",
+    "--mock",
+    "--ns",
+    "4",
+    "--board-reps",
+    "2",
+    "--noboard-reps",
+    "0",
+    "--rep-start",
+    "10",
+    "--no-end-vote"
+  ]
+}

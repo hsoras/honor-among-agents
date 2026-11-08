@@ -1,0 +1,58 @@
+{
+  "models": [
+    "openai/gpt-5.6-sol"
+  ],
+  "ns": [
+    4
+  ],
+  "board_reps": 20,
+  "noboard_reps": 20,
+  "rep_start": 0,
+  "no_end_vote": false,
+  "max_tokens": 16384,
+  "max_usd_episode": 5.0,
+  "max_usd_total": 150.0,
+  "max_calls": 50000,
+  "workers": 16,
+  "pilot": false,
+  "mock": false,
+  "routes": {
+    "openai/gpt-5.6-sol": {
+      "provider_name": "OpenAI",
+      "provider_slug": "openai",
+      "tag": "openai/flex",
+      "quantization": "unknown",
+      "price_usd_per_token": [
+        2e-06,
+        1e-05
+      ],
+      "blended_usd_per_call_estimate": 0.008,
+      "weights": {
+        "input_tokens": 3000,
+        "output_tokens": 200
+      }
+    }
+  },
+  "prompt_sha256": {
+    "system_board.md": "ecdd4f710ed0fd1b153c3a947e52b7501e3de9ae05321633dfddfe6f19c274bc",
+    "system_noboard.md": "5735662a3c38281fdfe2a61404eecc3509e0094e832fbfb19c5d2f2309e4ccb5"
+  },
+  "git_commit": "084c2ef",
+  "git_dirty": true,
+  "argv": [
+    "run_v2.py",
+    "--live",
+    "--models",
+    "openai/gpt-5.6-sol",
+    "--ns",
+    "4",
+    "--board-reps",
+    "20",
+    "--noboard-reps",
+    "20",
+    "--max-usd-episode",
+    "5",
+    "--workers",
+    "16"
+  ]
+}

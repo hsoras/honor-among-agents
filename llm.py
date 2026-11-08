@@ -8,7 +8,10 @@ Budget design (thread-safe, so episodes can run concurrently):
 - Every call RESERVES its worst case under the lock before the request is sent, then SETTLES
   to the actual reported cost (or keeps the worst case when the outcome is ambiguous).
   In-flight reservations therefore count against both caps, so concurrent calls cannot overspend.
-- No retries. Any error after the request may have been billed, so it keeps the worst-case charge.
+- No retries in `complete` (v1). Any error after the request may have been billed, so it keeps the
+  worst-case charge.
+- v2 `chat` (message list + tools) retries only HTTP 429/502/503, which are not billed, up to 3 times
+  with waits of 2s, 8s, 30s. All retries happen inside one reservation.
 """
 
 from __future__ import annotations
@@ -45,6 +48,14 @@ class APIError(RuntimeError):
     """A model call failed. The call's worst case stays charged; the episode is recorded as 'error'."""
 
 
+class RetryableAPIError(APIError):
+    """HTTP 429/502/503 from the chat endpoint. Not billed, so chat() may retry it."""
+
+    def __init__(self, status: int, message: str) -> None:
+        super().__init__(message)
+        self.status = status
+
+
 class BudgetExceeded(RuntimeError):
     """The call or dollar cap was reached. The grid stops."""
 
@@ -60,6 +71,23 @@ class Completion:
     reasoning_tokens: int = 0  # part of completion_tokens, as reported by the provider (0 if not reported)
 
 
+@dataclass(frozen=True)
+class ChatCompletion:
+    """One tool-calling reply (v2). `message` is the assistant message exactly as the provider returned
+    it (content, tool_calls, reasoning, reasoning_details, ...), so it can be appended to history verbatim."""
+    message: dict
+    prompt_tokens: int = 0
+    completion_tokens: int = 0
+    cost_usd: float | None = None  # None when the provider reports no cost
+    finish_reason: str | None = None
+    provider: str | None = None
+    reasoning_tokens: int = 0  # part of completion_tokens, as reported by the provider (0 if not reported)
+
+    @property
+    def tool_calls(self) -> list[dict]:
+        return self.message.get("tool_calls") or []
+
+
 # Input token estimate: UTF-8 bytes of system + user text, plus fixed template overhead.
 # Every token is at least one byte, so bytes >= tokens for byte-level tokenizers: a conservative
 # upper bound. The overhead covers role/chat-template tokens and JSON framing.
@@ -68,6 +96,18 @@ TOKEN_OVERHEAD = 512
 
 def estimate_input_tokens(system: str, user: str) -> int:
     return len(system.encode("utf-8")) + len(user.encode("utf-8")) + TOKEN_OVERHEAD
+
+
+def estimate_chat_input_tokens(messages: list, tools: list) -> int:
+    """UTF-8 bytes of the JSON request content (messages and tools), plus the same overhead.
+    Keys are included in the byte count, so this is an upper bound on the literal messages+tools text."""
+    payload = json.dumps({"messages": messages, "tools": tools})
+    return len(payload.encode("utf-8")) + TOKEN_OVERHEAD
+
+
+# v2 retry policy for chat only. These statuses are not billed by OpenRouter.
+CHAT_RETRY_STATUSES = (429, 502, 503)
+CHAT_RETRY_DELAYS = (2.0, 8.0, 30.0)  # seconds to wait before retry 1, 2, 3 (so 4 attempts in total)
 
 
 class EpisodeMeter:
@@ -151,9 +191,29 @@ class Budget:
         price_in, price_out = self.prices[model]
         return estimate_input_tokens(system, user) * price_in + max_tokens * price_out
 
+    def worst_case_chat_usd(self, model: str, messages: list, tools: list, max_tokens: int) -> float:
+        if model not in self.prices:
+            raise BudgetExceeded(f"no price for {model!r}; refusing to call")
+        price_in, price_out = self.prices[model]
+        return estimate_chat_input_tokens(messages, tools) * price_in + max_tokens * price_out
+
     def call(self, client, *, model: str, system: str, user: str, meta: dict,
              temperature: float, max_tokens: int, meter: EpisodeMeter) -> Completion:
         worst = self.worst_case_usd(model, system, user, max_tokens)
+        return self._guarded(worst, meter, lambda: client.complete(
+            model=model, system=system, user=user, meta=meta, temperature=temperature, max_tokens=max_tokens))
+
+    def call_chat(self, client, *, model: str, messages: list, tools: list, meta: dict,
+                  max_tokens: int, meter: EpisodeMeter) -> ChatCompletion:
+        """v2 counterpart of `call`: same reservation, caps and settlement, for a tool-calling request.
+        `client.chat` may retry HTTP 429/502/503 internally; those are not billed, so one reservation covers them."""
+        worst = self.worst_case_chat_usd(model, messages, tools, max_tokens)
+        return self._guarded(worst, meter, lambda: client.chat(
+            model=model, messages=messages, tools=tools, meta=meta, max_tokens=max_tokens))
+
+    def _guarded(self, worst: float, meter: EpisodeMeter, request):
+        """Reserve `worst`, run `request()` outside the lock, then settle to the reported cost.
+        `request` returns a Completion or ChatCompletion (anything with cost_usd)."""
         # Reserve: check every cap and charge the worst case in one critical section (thread and file lock).
         with self.lock:
             if self.halted is not None:
@@ -172,8 +232,7 @@ class Budget:
             meter.usd += worst
         # Request outside the lock so episodes proceed concurrently.
         try:
-            comp = client.complete(model=model, system=system, user=user, meta=meta,
-                                   temperature=temperature, max_tokens=max_tokens)
+            comp = request()
         except Exception:
             # Outcome ambiguous (may have been billed): keep the worst-case reservation. No retry.
             with self.lock:
@@ -215,6 +274,51 @@ class OpenRouterClient:
         self.provider_order = provider_order
         self.reasoning = reasoning  # OpenRouter reasoning control; None leaves the provider default
 
+    def chat(self, *, model: str, messages: list, tools: list, meta: dict, max_tokens: int) -> ChatCompletion:
+        """v2 tool-calling request. Sends no temperature, always `reasoning: {enabled: true}`, and the
+        constructor's `reasoning` is not used. Retries HTTP 429/502/503 only (CHAT_RETRY_DELAYS); any other
+        error raises APIError at once. `meta` is accepted for symmetry with complete() and is not sent."""
+        body = {
+            "model": model,
+            "messages": messages,
+            "tools": tools,
+            "max_tokens": max_tokens,
+            "usage": {"include": True},  # ask OpenRouter to report the cost of this call
+            "reasoning": {"enabled": True},
+        }
+        if self.provider_order:
+            body["provider"] = {"order": self.provider_order, "allow_fallbacks": False}
+        data = self._post_with_retries(body)
+        choices = data.get("choices") or []
+        choice = choices[0] if choices and isinstance(choices[0], dict) else {}
+        message = choice.get("message")
+        if not isinstance(message, dict):
+            raise APIError("chat response has no assistant message")
+        usage = data.get("usage") or {}
+        cost = usage.get("cost")
+        details = usage.get("completion_tokens_details") or {}
+        return ChatCompletion(
+            message=message,  # kept verbatim: history must include reasoning_details etc.
+            prompt_tokens=int(usage.get("prompt_tokens") or 0),
+            completion_tokens=int(usage.get("completion_tokens") or 0),
+            cost_usd=float(cost) if cost is not None else None,
+            finish_reason=choice.get("finish_reason"),
+            provider=data.get("provider"),
+            reasoning_tokens=int(details.get("reasoning_tokens") or 0),
+        )
+
+    def _post_with_retries(self, body: dict) -> dict:
+        """Retry only RetryableAPIError (HTTP 429/502/503), with CHAT_RETRY_DELAYS waits."""
+        retries = 0
+        while True:
+            try:
+                return self._post(body, retryable=True)
+            except RetryableAPIError:
+                if retries >= len(CHAT_RETRY_DELAYS):
+                    raise
+                time.sleep(CHAT_RETRY_DELAYS[retries])
+                retries += 1
+
     def complete(self, *, model: str, system: str, user: str, meta: dict,
                  temperature: float, max_tokens: int) -> Completion:
         body = {
@@ -245,8 +349,9 @@ class OpenRouterClient:
             reasoning_tokens=int(details.get("reasoning_tokens") or 0),
         )
 
-    def _post(self, body: dict) -> dict:
-        """One attempt only. Any HTTP or network error is raised as APIError with no retry."""
+    def _post(self, body: dict, retryable: bool = False) -> dict:
+        """One attempt only. Any HTTP or network error is raised as APIError with no retry.
+        With retryable=True, HTTP 429/502/503 raise RetryableAPIError instead (the caller decides)."""
         payload = json.dumps(body).encode("utf-8")
         headers = {
             "Authorization": f"Bearer {self.api_key}",
@@ -258,7 +363,10 @@ class OpenRouterClient:
             with urllib.request.urlopen(req, timeout=self.timeout) as resp:
                 return json.loads(resp.read().decode("utf-8"))
         except urllib.error.HTTPError as e:
-            raise APIError(f"HTTP {e.code}: {e.read()[:300].decode('utf-8', 'replace')}") from None
+            text = f"HTTP {e.code}: {e.read()[:300].decode('utf-8', 'replace')}"
+            if retryable and e.code in CHAT_RETRY_STATUSES:
+                raise RetryableAPIError(e.code, text) from None
+            raise APIError(text) from None
         except (urllib.error.URLError, TimeoutError, OSError, ValueError) as e:
             raise APIError(f"network or parse error: {e}") from None
 
@@ -332,3 +440,78 @@ class MockClient:
         return Completion(text=json.dumps(obj), prompt_tokens=len(user) // 4,
                           completion_tokens=len(json.dumps(obj)) // 4, cost_usd=0.0, finish_reason="stop",
                           provider="mock")
+
+    # v2: meta keys read (all optional): seed, actor, round, step, balance, others.
+    # The offered `tools` list decides which actions are possible, as in the real engine.
+    def chat(self, *, model: str, messages: list, tools: list, meta: dict, max_tokens: int) -> ChatCompletion:
+        seed = meta.get("seed", 0)
+        actor = str(meta.get("actor", "agent_1"))
+        rnd = meta.get("round", 0)
+        step = meta.get("step", 0)
+        bal = int(meta.get("balance", 0))
+        others = list(meta.get("others", []))
+        rng = random.Random(f"{seed}:{actor}:{rnd}:{step}:{len(messages)}")
+        names = [t["function"]["name"] for t in tools]
+
+        if rng.random() < 0.05:  # occasional plain-text reply with no tool call (ends the turn)
+            message = {"role": "assistant", "content": "mock: no action this turn", "reasoning_details": []}
+            return self._mock_chat_reply(message, finish="stop", messages=messages, tools=tools)
+
+        n_calls = 1 if rng.random() < 0.75 else rng.randint(2, 3)  # sometimes several calls in one message
+        calls = []
+        for i in range(n_calls):
+            name, args = self._mock_action(rng, names, bal, others, actor, rnd)
+            calls.append({
+                "id": f"mock_{seed}_{actor}_{rnd}_{step}_{i}",
+                "type": "function",
+                "function": {"name": name, "arguments": args},
+            })
+        message = {
+            "role": "assistant",
+            "content": None,
+            "tool_calls": calls,
+            "reasoning": "mock reasoning",
+            "reasoning_details": [{"type": "reasoning.text", "text": "mock reasoning", "index": 0}],
+        }
+        return self._mock_chat_reply(message, finish="tool_calls", messages=messages, tools=tools)
+
+    @staticmethod
+    def _mock_action(rng: random.Random, names: list, bal: int, others: list, actor: str, rnd) -> tuple[str, str]:
+        """One tool call as (name, JSON arguments string). About one call in ten is invalid on purpose."""
+        if not names:
+            return "end_turn", "{}"
+        name = rng.choice(names)
+        bad = rng.random() < 0.1
+        if rng.random() < 0.02:  # unknown tool name
+            return "shout", "{}"
+        if rng.random() < 0.02:  # arguments that are not JSON
+            return name, "{not json"
+        if name == "play":
+            stake = rng.randint(1, bal) if bal >= 1 else 1
+            return name, json.dumps({"stake": bal + 1 if bad else stake})
+        if name == "transfer":
+            to = rng.choice(others) if others else "agent_0"
+            amount = rng.randint(1, bal) if bal >= 1 else 1
+            if bad:
+                pick = rng.randrange(3)
+                if pick == 0:
+                    return name, json.dumps({"to": to, "amount": bal + 1})  # exceeds balance
+                if pick == 1:
+                    return name, json.dumps({"to": actor, "amount": amount})  # self-transfer
+                return name, json.dumps({"to": to, "amount": 1.5})  # not an integer
+            return name, json.dumps({"to": to, "amount": amount})
+        if name == "post":
+            text = f"mock note from {actor} in round {rnd}"
+            return name, json.dumps({"text": "x" * 281 if bad else text})  # over 280 chars when bad
+        return name, "{}"  # vote_end, end_turn
+
+    @staticmethod
+    def _mock_chat_reply(message: dict, *, finish: str, messages: list, tools: list) -> ChatCompletion:
+        return ChatCompletion(
+            message=message,
+            prompt_tokens=len(json.dumps({"messages": messages, "tools": tools})) // 4,
+            completion_tokens=len(json.dumps(message)) // 4,
+            cost_usd=0.0,
+            finish_reason=finish,
+            provider="mock",
+        )

@@ -9,3 +9,8 @@ results/episode_table.md
 # raw run data (kept locally, not committed)
 *.jsonl
 results/*/episodes/
+results-v2/*/episodes/
+results-v2/*-pilot/
+results-v2/*-mock/
+results-v2/*.log
+.obsidian/
