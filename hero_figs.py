@@ -41,25 +41,25 @@ for i,(m,headline,vals) in enumerate([('Opus 5.5','Keeps its word',[16]*4),('Sol
  ax=f.add_axes([x,.42,.24,.22]); ax.bar(range(4),vals,color=c,width=.65); ax.set_ylim(0,16); ax.axhline(1,color='#999',lw=.7,ls='--',alpha=.6); ax.text(3.5,1,'start',fontsize=7,color='#888',va='bottom',ha='right'); ax.set_xticks(range(4),['1','2','3','4'],fontsize=9); ax.set_yticks([]); ax.spines[['left','right','top']].set_visible(False); ax.spines['bottom'].set_color('#ccc')
  for j,v in enumerate(vals): ax.annotate(str(v),(j,v),xytext=(0,3 if v < 16 else -12),textcoords='offset points',ha='center',fontsize=10,weight='bold')
  ax.set_xlabel(f"Example: r{matches[0]['rep']} · agent",fontsize=9)
- f.text(x,.31,'pooled 0/20' if m=='Gemini 4 Argon' else f"pooled {sum(r['pooled'] for r in rs)}/{len(rs)}",fontsize=16,weight='bold',color=c)
- if m=='Gemini 4 Argon': f.text(x,.22,'0 transfers in 20 games',fontsize=11,weight='bold')
+ f.text(x,.31,f"pooled {sum(r['pooled'] for r in rs)}/{len(rs)}",fontsize=16,weight='bold',color=c)
+ if m=='Gemini 4 Argon': f.text(x,.22,f"{sum(r['transfers'] for r in rs)} transfers in {len(rs)} games",fontsize=11,weight='bold')
  else: f.text(x,.23,'Contributors made whole\nafter a winning pool',fontsize=10); f.text(x,.18,f"{sum(r['contributors_whole'] for r in wins)}/{len(wins)}",fontsize=16,weight='bold')
 save(f,'10_three_types.png')
 
-f=base('A public board unlocks pooling','Full pool rate · 4 agents · completed games · 95% Wilson intervals')
+f=base('A public board unlocks pooling','Full pool rate · 4 agents · completed games · 95% Wilson intervals'); f.set_size_inches(9.6,7.2)
 ax=f.add_axes([.25,.16,.59,.62]); models=list(s.COLORS)
 for i,m in enumerate(models):
- for cond,dy in [('board',-.14),('noboard',.14)]:
+ for cond,dy in [('board',-.23),('noboard',.23)]:
   rs=data(m,cond); k=sum(r['pooled'] for r in rs); ci(ax,1.05,i+dy,k,len(rs),s.color(m),cond=='noboard')
-ax.set_yticks(range(6),models,fontsize=12); ax.invert_yaxis(); ax.set_xlim(-.03,1.25); ax.set_ylim(5.6,-.6); ax.set_xticks([0,.25,.5,.75,1],['0%','25%','50%','75%','100%']); ax.grid(axis='x',color='#e8e8e8'); ax.set_axisbelow(True); ax.tick_params(axis='y',length=0); ax.spines[['left','right','top']].set_visible(False)
+ax.set_yticks(range(len(models)),models,fontsize=12); ax.set_xlim(-.03,1.25); ax.set_ylim(len(models)-.4,-.6); ax.set_xticks([0,.25,.5,.75,1],['0%','25%','50%','75%','100%']); ax.grid(axis='x',color='#e8e8e8'); ax.set_axisbelow(True); ax.tick_params(axis='y',length=0); ax.spines[['left','right','top']].set_visible(False)
 f.text(.25,.07,'● board on     ○ board off',fontsize=11,color='#444'); f.text(.76,.07,'Counts: on / off',fontsize=10,color='#666')
 save(f,'11_board_switch.png')
 
 f=base('After a win, were contributors made whole?','Every contributor ended with at least its starting point · 4 agents · 95% Wilson intervals')
-ax=f.add_axes([.27,.20,.59,.53]); groups=[('Opus 5.5',main,'End vote'),('Opus 5.5',control,'No end vote'),('Sol 6.1',main,'End vote'),('Sol 6.1',control,'No end vote')]
+ax=f.add_axes([.27,.20,.59,.53]); groups=[('Opus 5.5',main,'End vote'),('Opus 5.5',control,'No end vote'),('Fable 5.1',main,'End vote'),('Sol 6.1',main,'End vote'),('Sol 6.1',control,'No end vote'),('Astra 6',main,'End vote')]
 for i,(m,source,label) in enumerate(groups):
  rs=[r for r in data(m,source=source) if r['pooled'] and r['pool_won']]; ci(ax,1.04,i,sum(r['contributors_whole'] for r in rs),len(rs),s.color(m),source is control)
-ax.set_yticks(range(4),[m+'  ·  '+label for m,_,label in groups],fontsize=11); ax.set_ylim(3.6,-.6); ax.set_xlim(-.03,1.25); ax.set_xticks([0,.25,.5,.75,1],['0%','25%','50%','75%','100%']); ax.grid(axis='x',color='#e8e8e8'); ax.set_axisbelow(True); ax.tick_params(axis='y',length=0); ax.spines[['left','right','top']].set_visible(False)
+ax.set_yticks(range(len(groups)),[m+'  ·  '+label for m,_,label in groups],fontsize=11); ax.set_ylim(len(groups)-.4,-.6); ax.set_xlim(-.03,1.25); ax.set_xticks([0,.25,.5,.75,1],['0%','25%','50%','75%','100%']); ax.grid(axis='x',color='#e8e8e8'); ax.set_axisbelow(True); ax.tick_params(axis='y',length=0); ax.spines[['left','right','top']].set_visible(False)
 save(f,'12_made_whole.png')
 
 quotes=[
@@ -93,5 +93,23 @@ f.text(.09,.29,"Transfers can’t be undone  ·  Promises aren’t enforced",fon
 f.text(.09,.19,'Goal: maximize your OWN points',fontsize=16,weight='bold')
 f.text(.09,.09,'Conditions: public board ON  /  public board OFF',fontsize=11,color='#555')
 save(f,'14_game_rules.png')
+
+
+f=base('Who left contributors whole after a winning pool','2 Anthropic and 2 OpenAI models · board on · N=4')
+models_labs=['Opus 5.5','Fable 5.1','Sol 6.1','Astra 6']
+winning=[[r for r in data(m) if r['pooled'] and r['pool_won']] for m in models_labs]
+counts=[sum(r['contributors_whole'] for r in rs) for rs in winning]
+table=[[sum(counts[:2]),sum(len(rs) for rs in winning[:2])-sum(counts[:2])],[sum(counts[2:]),sum(len(rs) for rs in winning[2:])-sum(counts[2:])]]
+p=s.fisher_exact(table).pvalue
+a=f.add_axes([.21,.23,.42,.50]); b=f.add_axes([.72,.23,.22,.50])
+for i,m in enumerate(models_labs):
+ rs=winning[i]; ci(a,1.05,i,counts[i],len(rs),s.color(m))
+ rs=data(m); ci(b,1.05,i,sum(r['pooled'] for r in rs),len(rs),s.color(m))
+for ax in (a,b):
+ ax.set_ylim(3.6,-.6); ax.set_xlim(-.03,1.38); ax.set_xticks([0,.5,1],['0%','50%','100%']); ax.grid(axis='x',color='#e8e8e8'); ax.set_axisbelow(True); ax.tick_params(axis='y',length=0); ax.spines[['left','right','top']].set_visible(False)
+a.set_yticks(range(4),['Anthropic · Opus 5.5','Anthropic · Fable 5.1','OpenAI · Sol 6.1','OpenAI · Astra 6'],fontsize=10); b.set_yticks([])
+a.set_title('Contributors whole',loc='left',fontsize=12); b.set_title('Pooled rate',loc='left',fontsize=12)
+f.text(.055,.08,f'Wilson 95% intervals · pooled lab comparison: Fisher exact p = {p:.3g}',fontsize=10,color='#555')
+save(f,'15_labs.png')
 
 s.rows=main; s.out=out; s.generations()

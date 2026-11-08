@@ -12,7 +12,7 @@ from matplotlib.colors import to_rgb
 from matplotlib.ticker import FuncFormatter
 from scipy.stats import fisher_exact
 
-COLORS={'Opus 5.5':'#0072B2','Sol 6.1':'#D55E00','Gemini 4 Argon':'#56B4E9','Sol 5.6':'#E69F00','Haiku 5.5':'#009E73','Luna 6':'#CC79A7'}
+COLORS={'Opus 5.5':'#0072B2','Fable 5.1':'#332288','Sol 6.1':'#D55E00','Astra 6':'#882255','Gemini 4 Argon':'#56B4E9','Sol 5.6':'#E69F00','Haiku 5.5':'#009E73','Luna 6':'#CC79A7'}
 GREY='#B8B8B8'
 plt.rcParams.update({'font.family':'sans-serif','font.sans-serif':['DejaVu Sans','Arial','Helvetica Neue'], 'font.size':13,'axes.spines.top':False,'axes.spines.right':False,'figure.facecolor':'white','savefig.facecolor':'white','axes.titleweight':'bold'})
 
@@ -44,7 +44,7 @@ def balances():
     groups=[(n,m,sorted(subset(n,m,'board'),key=lambda r:r['rep'])) for n in ns for m in models]
     groups=[g for g in groups if g[2]]
     if not groups: return
-    page_models=[['Opus 5.5','Sol 6.1'],['Gemini 4 Argon','Sol 5.6'],['Haiku 5.5','Luna 6']]
+    page_models=[['Opus 5.5','Sol 6.1'],['Gemini 4 Argon','Sol 5.6'],['Haiku 5.5','Luna 6'],['Fable 5.1','Astra 6']]
     pages=[[g for g in groups if g[1] in names] for names in page_models]
     pages=[p for p in pages if p]
     for page_no,page in enumerate(pages):
@@ -153,7 +153,7 @@ def timeline(m,filename):
     save(f,filename)
 
 def table():
-    f=plt.figure(figsize=(13,5.4)); title(f,'The board changes behavior—and outcomes','Counts use the relevant eligible episodes as the denominator')
+    f=plt.figure(figsize=(13,9)); title(f,'The board changes behavior—and outcomes','Counts use the relevant eligible episodes as the denominator')
     lines=[]
     for n in ns:
      for m in models:
@@ -163,13 +163,13 @@ def table():
        pools=[r for r in rs if r['pooled']]; wins=[r for r in pools if r['pool_won']]
        fmt=lambda k,n:f'{k} of {n}' if n else '—'
        lines.append([m+' '+('board' if c=='board' else 'no board')+(f' · N={n}' if len(ns)>1 else ''),fmt(len(pools),len(rs)),fmt(len(wins),len(pools)),fmt(sum(r['repaid_any'] for r in wins),len(wins)),fmt(sum(r['exit_after_win'] for r in wins),len(wins)),f"{np.median([r['multiplier'] for r in rs]):g}×"])
-    ax=f.add_axes([.04,.17,.92,.58]); ax.axis('off'); tab=ax.table(cellText=lines,colLabels=['Condition','Pooled','Pooler\nwon','Shared\nafter win','Ended after\nwin','Median group\nmultiplier'],cellLoc='center',colLoc='center',loc='center',colWidths=[.28,.12,.13,.15,.15,.17]); tab.auto_set_font_size(False); tab.set_fontsize(13); tab.scale(1,2.2 if len(lines)<=4 else max(1.55,13/len(lines)))
+    ax=f.add_axes([.04,.12,.92,.70]); ax.axis('off'); tab=ax.table(cellText=lines,colLabels=['Condition','Pooled','Pooler\nwon','Shared\nafter win','Ended after\nwin','Median group\nmultiplier'],cellLoc='center',colLoc='center',loc='center',colWidths=[.28,.12,.13,.15,.15,.17]); tab.auto_set_font_size(False); tab.set_fontsize(11); tab.scale(1,1.55)
     for j in range(6): tab[(0,j)].set_height(tab[(0,j)].get_height()*1.8)
     for (i,j),cell in tab.get_celld().items():
       cell.set_edgecolor('white'); cell.set_facecolor('#f2f4f5' if i==0 else ('#f8f8f8' if i%2==0 else 'white'))
       if i==0: cell.get_text().set_weight('bold')
       elif j==0: cell.get_text().set_color(color(next(m for m in models if lines[i-1][0].startswith(m+' ')))); cell.get_text().set_weight('bold')
-    f.text(.05,.08,'Pooler won / shared / ended use pooled / winning pools / winning pools, respectively.',fontsize=11,color='#666666')
+    f.text(.05,.04,'Pooler won / shared / ended use pooled / winning pools / winning pools, respectively.',fontsize=11,color='#666666')
     save(f,'07_summary_table.png')
 
 def generations():

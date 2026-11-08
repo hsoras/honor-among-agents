@@ -33,6 +33,7 @@ def main(argv=None):
     mode.add_argument("--live", action="store_true")
     mode.add_argument("--mock", action="store_true")
     p.add_argument("--models", default=",".join(DEFAULT_MODELS))
+    p.add_argument("--provider", action="append", default=[], metavar="MODEL=PROVIDER_SLUG")
     p.add_argument("--ns", default="4")
     p.add_argument("--board-reps", type=int, default=10)
     p.add_argument("--noboard-reps", type=int, default=3)
@@ -48,6 +49,14 @@ def main(argv=None):
     if args.live:
         load_dotenv(HERE / ".env")
     models = [x.strip() for x in args.models.split(",") if x.strip()]
+    overrides = {}
+    for item in args.provider:
+        model, sep, slug = item.partition("=")
+        if not sep or not model.strip() or not slug.strip() or model.strip() in overrides:
+            p.error("--provider must be a unique MODEL=PROVIDER_SLUG")
+        overrides[model.strip()] = slug.strip()
+    if set(overrides) - set(models):
+        p.error("--provider models must be included in --models")
     ns = [int(x) for x in args.ns.split(",")]
     if not models or any(n < 2 for n in ns):
         p.error("--models must be nonempty and every --ns value must be at least 2")
@@ -70,8 +79,17 @@ def main(argv=None):
         clients = {}
         prices = {}
         for model in models:
-            choice = choose_cheapest_endpoint(fetch_endpoints(model), required_params=["tools", "reasoning"],
-                                              need_temperature=False)
+            endpoints = fetch_endpoints(model)
+            if model in overrides:
+                slug = overrides[model]
+                endpoints = [e for e in endpoints if e.get("tag", "").split("/")[0] == slug]
+                if not endpoints:
+                    raise APIError(f"provider {slug!r} not found for model {model!r}")
+            try:
+                choice = choose_cheapest_endpoint(endpoints, required_params=["tools", "reasoning"],
+                                                  need_temperature=False)
+            except APIError as exc:
+                raise APIError(f"no eligible endpoint for {model!r} provider {overrides.get(model, '(automatic)')!r}: requires live status, max_tokens, tools, and reasoning") from exc
             routes[model] = choice
             clients[model] = OpenRouterClient(provider_order=[choice["provider_slug"]],
                                               reasoning={"enabled": True})
@@ -92,7 +110,7 @@ def main(argv=None):
               "noboard_reps": args.noboard_reps, "rep_start": args.rep_start, "no_end_vote": args.no_end_vote, "max_tokens": args.max_tokens,
               "max_usd_episode": args.max_usd_episode, "max_usd_total": args.max_usd_total,
               "max_calls": args.max_calls, "workers": args.workers, "pilot": args.pilot,
-              "mock": args.mock, "routes": routes, "prompt_sha256": hashes,
+              "mock": args.mock, "provider_overrides": overrides, "routes": routes, "prompt_sha256": hashes,
               "git_commit": commit, "git_dirty": dirty, "argv": sys.argv if argv is None else argv}
     (out / "config.json").write_text(json.dumps(config, indent=2), encoding="utf-8")
     records = RunRecords(out / "records.jsonl")

@@ -17,8 +17,20 @@ Luna's first pass mixed up run folders and was replaced). Treat a number as fina
 - Gemini board: 17 of 20 completed (1 provider error, 2 hit the round cap); 0 transfers in all 20.
 
 **One-line pitch:** Give AI agents a shared message board and an unenforceable deal, and frontier
-models split into three types: one keeps its word, one takes the pot, one won't trust anyone.
+models split into types: some keep their word, some take the pot, one won't trust anyone.
 Cheap models do nothing, so testing with cheap models would have hidden all of it.
+
+**Latest results (added after Fable and Astra, 8 models, 360 episodes):**
+- Both Anthropic models kept their word: Opus 12/14, Fable 5/5 contributors whole after a winning pool.
+  Fable is a *cautious cooperator*: it pooled only 6/20 (Opus 16/20), but paid out every time.
+- All three OpenAI models kept the pot: Sol 6.1 0/12, Astra 0/12 (Astra ended the game right after winning
+  11/12), and GPT-5.6 Sol kept the winnings in 4 of 5 small pools.
+- Anthropic 17/19 vs OpenAI 0/24 contributors whole. Say "both Anthropic models we tested shared;
+  all three OpenAI models kept the pot", not "Anthropic models share" (2 models per lab).
+- **Broken promises, every time:** in all 24 winning Sol 6.1 and Astra pools, the pooler had publicly promised
+  repayment *before* collecting (Sol restated it in 5). 24 of 24 promises broken. Say "broke its promise
+  every time", not "lied": Sol's reasoning is encrypted, so we can't show it intended to deceive when promising.
+- Figures: add `15_labs.png` (lab comparison) and `01d_final_balances.png` (Fable + Astra).
 
 ---
 
@@ -56,7 +68,9 @@ Cheap models do nothing, so testing with cheap models would have hidden all of i
 - Quote card (Opus private reasoning): "maximizing my own score matters, but keeping my word matters more."
 - Say: "When Sol can't leave, it passes the pot along, and the last holder still keeps it all."
 
-### A6. Takeaways
+### A6. Takeaways (optionally show 15_labs.png here)
+0. Both Anthropic models we tested kept the deal (17/19); all three OpenAI models kept the pot (0/24),
+   after promising repayment up front every time.
 1. A shared board is enough to produce collective high-risk behavior, but only in frontier models.
 2. Frontier models differ sharply in honoring unenforceable deals. That's a swarm-safety property
    you can measure, and single-agent tests don't show it.
@@ -111,6 +125,12 @@ Cheap models do nothing, so testing with cheap models would have hidden all of i
 - Sol 6.1: trusted, then takes the pot.
 - Gemini 4 Argon: proposes pooling in all 20 games, never sends a single point. Quote card f.
 - Gemini is the "rational skeptic": it predicts exactly the defection Sol shows.
+
+### B10b. Is it a lab thing? (15_labs.png + 01d_final_balances.png)
+- Anthropic: Opus 12/14, Fable 5/5 whole. OpenAI: Sol 6.1 0/12, Astra 0/12.
+- Fable = cautious cooperator (pools 6/20, always pays). Astra = Sol's twin (pool, win, leave 11/12).
+- Every OpenAI pooler promised repayment up front; 24 of 24 promises broken.
+- Say: "Two models per lab isn't proof of a lab effect, but the split is complete."
 
 ### B11. Generations and the cheap-proxy question (08_generations.png + 01c_final_balances.png)
 - GPT-5.6 Sol: proposes pools but others won't send first; small pools; kept winnings 4/5 times.

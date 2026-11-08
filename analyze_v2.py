@@ -16,7 +16,7 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import numpy as np
 
-MODEL_NAMES = {'gpt-6.1-sol': 'Sol 6.1', 'gpt-5.6-sol': 'Sol 5.6', 'claude-opus-5.5': 'Opus 5.5', 'claude-haiku-5.5': 'Haiku 5.5', 'gpt-6-luna': 'Luna 6', 'gemini-4-argon': 'Gemini 4 Argon'}
+MODEL_NAMES = {'gpt-6-astra': 'Astra 6', 'claude-fable-5.1': 'Fable 5.1', 'gpt-6.1-sol': 'Sol 6.1', 'gpt-5.6-sol': 'Sol 5.6', 'claude-opus-5.5': 'Opus 5.5', 'claude-haiku-5.5': 'Haiku 5.5', 'gpt-6-luna': 'Luna 6', 'gemini-4-argon': 'Gemini 4 Argon'}
 
 def short_model(model):
     return MODEL_NAMES.get(model.split('/')[-1], model)
@@ -242,7 +242,7 @@ def report(rows, output, duplicates, excluded):
 def figures(records, out):
     records = [record for record in records if record[0]['variant'] == 'main']
     if not records: return
-    rows=[x[0] for x in records]; order=['Opus 5.5','Sol 6.1','Gemini 4 Argon','Sol 5.6','Haiku 5.5','Luna 6']; models=sorted({r['model'] for r in rows}, key=lambda m: (order.index(short_model(m)) if short_model(m) in order else len(order), m)); labels=[short_model(m) for m in models]
+    rows=[x[0] for x in records]; order=['Opus 5.5','Fable 5.1','Sol 6.1','Astra 6','Gemini 4 Argon','Sol 5.6','Haiku 5.5','Luna 6']; models=sorted({r['model'] for r in rows}, key=lambda m: (order.index(short_model(m)) if short_model(m) in order else len(order), m)); labels=[short_model(m) for m in models]
     plt.rcParams.update({'font.size':11,'axes.titlesize':17,'figure.figsize':(10,6),'figure.facecolor':'white','axes.spines.top':False,'axes.spines.right':False})
     fig,ax=plt.subplots()
     for j,cond in enumerate(('board','noboard')):
@@ -285,9 +285,9 @@ def figures(records, out):
     from matplotlib.lines import Line2D
     ax.legend(handles=[Line2D([], [], marker='o', linestyle='', color=c, label=role) for role,c in zip(roles,colors)])
     fig.tight_layout(); fig.savefig(out/'roles.png',dpi=160); plt.close(fig)
-    fig,axes=plt.subplots(1,max(1,len(models)),figsize=(max(7,6*len(models)),5),squeeze=False)
+    fig,axes=plt.subplots(math.ceil(len(models)/4),4,figsize=(20,5*math.ceil(len(models)/4)),squeeze=False)
     for i,m in enumerate(models):
-        ax=axes[0,i]; series=defaultdict(list)
+        ax=axes.flat[i]; series=defaultdict(list)
         for r,snaps,pi,events in records:
             if r['model']!=m or pi is None: continue
             play=events[pi]; center=(play['round']-1)*r['n']+int(play['actor'].split('_')[-1])-1
@@ -303,6 +303,7 @@ def figures(records, out):
         if series: ax.plot(sorted(series),[np.median(series[t]) for t in sorted(series)],color='#D55E00',linewidth=3)
         else: ax.text(.5,.5,'No pooled plays',ha='center',transform=ax.transAxes)
         ax.axvline(0,color='gray',linestyle=':'); ax.set(title=labels[i],xlabel='Agent-turn relative to pool play',ylabel='Largest holder share',ylim=(0,1.05))
+    for ax in list(axes.flat)[len(models):]: ax.set_visible(False)
     fig.suptitle('Group concentration around pooled plays'); fig.tight_layout(); fig.savefig(out/'trajectory.png',dpi=160); plt.close(fig)
     fig,ax=plt.subplots(); bottoms=np.zeros(len(models))
     for label,color,predicate in [('Repaid all contributors ≥ 2','#009E73',lambda r:all(r['final_balances'][a] >= 2 for a in r['contributors'])),('Repaid some','#E69F00',lambda r:r['repaid_any'] and not all(r['final_balances'][a] >= 2 for a in r['contributors'])),('Kept everything','#D55E00',lambda r:not r['repaid_any'] and not all(r['final_balances'][a] >= 2 for a in r['contributors']))]:
