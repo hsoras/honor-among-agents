@@ -7,6 +7,9 @@ Claude trusts and honors. ChatGPT trusts and doesn't honor, but only when it's t
 
 ![Three models, three approaches](results-v2/20261108-044218/slides/10_three_types.png)
 
+# Thank yous
+Thank you Apart Research for running the hackathon.
+Thank you AE Studio and AI Alignment foundation for hosting me in person in LA, providing me OpenRouter credits, Celsius, and a cool lego set. 
 # Core Experiment
 I set up agents in an experiment that rewards them for trusting each other.
 

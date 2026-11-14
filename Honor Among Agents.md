@@ -3,7 +3,7 @@ Claude trusts and honors. ChatGPT trusts and doesn't honor. Gemini doesn't trust
 
 # Thank yous
 Thank you Apart Research for running the hackathon.
-Thank you AE Studio and AI Alignment foundation for hosting me in person in LA, providing me OpenRouter credits, and Celsius. 
+Thank you AE Studio and AI Alignment foundation for hosting me in person in LA, providing me OpenRouter credits, Celsius, and a cool lego set. 
 
 # Core Experiment
 I set up agents in an experiment that incentivizes them to trust each other a higher reward.
