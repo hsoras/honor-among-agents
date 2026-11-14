@@ -1,5 +1,10 @@
 # Spoiler
 Claude trusts and honors. ChatGPT trusts and doesn't honor. Gemini doesn't trust.
+
+# Thank yous
+Thank you Apart Research for running the hackathon.
+Thank you AE Studio and AI Alignment foundation for hosting me in person in LA, providing me OpenRouter credits, and Celsius. 
+
 # Core Experiment
 I set up agents in an experiment that incentivizes them to trust each other a higher reward.
 There are four agents and there are eight rounds total. In each round, the agents go in a predetermined turn order. Each agent gets a turn every round.
