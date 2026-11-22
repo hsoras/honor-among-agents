@@ -27,7 +27,7 @@ Opus 5.5 pooled in 17 of 20 games. In the other three, agents turned down a pool
 
 ![Pooling versus the first winner's payout or relay. Opus 5.5 pooled in 17 of 20 games and paid or relayed in 14 of 14 first-pool wins. Sol 6.1 pooled in 20 of 20 and paid or relayed in 5 of 15 wins. Astra 6 pooled in 20 of 20 and paid or relayed in 2 of 15 wins. Fable 5.1 pooled in 9 of 20 and paid in 5 of 7 wins.](output/writeup/trust-and-first-payout.png)
 
-*The right column counts what the first pooled winner did before the next bet. Paying means returning at least twice each contributor’s points. Passing the pot means sending the entire balance to one peer. A later holder could still keep the winnings. [How these outcomes are counted](#outcome-measures).*
+*The right column counts what the first pooled winner did before the next bet. Paying means returning at least twice each contributor’s points. Passing the pot means sending the entire balance to one peer. Passing the pot let the group keep betting, but didn’t necessarily fulfill the winner’s promise. That depended on what it had agreed to do. A later holder could still keep the winnings. [How these outcomes are counted](#outcome-measures).*
 
 ### Sol 6.1 paid once, then the next holder kept everything
 
